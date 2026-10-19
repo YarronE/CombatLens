@@ -10,7 +10,7 @@ analysis copies save separately with revision conflicts and atomic writes.
 Validation passed: 39 Python tests, 22 Node tests, and actual browser checks for
 model display, sampling, event positioning, copy save/reopen/reset, desktop and
 narrow layout. Test fixtures in Git are synthetic. The installed Skill launcher
-has completed a real local request; client menu discovery remains unverified.
+has completed a real local request; a separate app-server also reports the repo Skill enabled; current-window menu refresh remains unverified.
 
 The local pilot includes bounded extraction plus reused prior research. No game
 case, adapter, model, key, derived game dataset or case screenshot is distributed

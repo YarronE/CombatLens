@@ -6,6 +6,8 @@
 - [x] T3 Connect research overview, timeline and registered model preview.
 - [x] T4 Validate routing, invalid data, persistence and public release exclusions.
 - [x] T5 Install and register the agent Skill as Incubator; verify direct and boundary requests.
-- [ ] T6 Commit, push and verify the public remote; return local case validation to the vault.
+- [x] T6 Commit, push and verify the public remote; return local case validation to the vault.
 
 Evidence: docs/VALIDATION.md; automated logs and real pilot receipts stay local.
+
+Initial implementation c4d01511984205f9797284d23f7a63707f314e79 was pushed and both remote branches verified.

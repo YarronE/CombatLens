@@ -17,5 +17,5 @@ registered, digest-checked assets into ignored local storage.
 
 Skill frontmatter and unique registry entry were checked manually. The optional
 quick_validate helper could not run because PyYAML was absent. Its local launcher
-and the real request flow were executed successfully. Dynamic client menu loading
-and clean-machine restoration are not claimed.
+and the real request flow were executed successfully. A separate app-server skills/list reports the repo Skill enabled. Current-window
+menu discovery and clean-machine restoration are not claimed.
