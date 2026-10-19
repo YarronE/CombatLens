@@ -7,7 +7,7 @@
 - 个人风格为 `E:/Ethans/00_System/Context/05_Personal-Style.md`。
 - 传递约定为 `E:/Ethans/00_System/跨项目协作/instructions.md`。
 - 当前设计与本机案例记录见知识库 GameReverseWorkbench 项目目录。
-- 当前任务为 `openspec/changes/add-designer-event-details/`，状态见 `docs/STATUS.md`。
+- 当前任务为 `openspec/changes/archive/2026-10-19-add-designer-event-details/`，状态见 `docs/STATUS.md`。
 
 ## 创建与同步约定
 

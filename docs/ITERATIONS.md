@@ -112,4 +112,4 @@ save/reopen, 390px width and no-guide/no-model fallback. Original package finger
 and source hashes remain unchanged. No new extraction, runtime observation or REA
 fork is claimed. All case notes, evidence and screenshots remain local.
 
-Spec: openspec/changes/add-designer-event-details/ (validated; delivery pending).
+Spec: openspec/changes/archive/2026-10-19-add-designer-event-details/ (verified and archived).
