@@ -19,6 +19,6 @@ run rendered without broken images. Official-image color sampling and inspected
 package-material coverage are recorded locally; unavailable texture color data
 remains a gap, never a whole-package color claim.
 
-Spec: openspec/changes/add-instrument-presentation/.
+Spec: openspec/changes/archive/2026-10-19-add-instrument-presentation/.
 Future increments remain event drag/resize, undo/redo, richer 3C and numeric
 analysis, then another independently verified game adapter.
