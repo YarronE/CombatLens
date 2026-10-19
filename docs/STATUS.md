@@ -7,7 +7,7 @@ research runs, source checks, stage reports, research overview and the generic
 action workspace. Registered models and animations use source-backed mapping;
 analysis copies save separately with revision conflicts and atomic writes.
 
-Validation passed: 39 Python tests, 22 Node tests, and actual browser checks for
+Validation passed: 40 Python tests, 22 Node tests, and actual browser checks for
 model display, sampling, event positioning, copy save/reopen/reset, desktop and
 narrow layout. Test fixtures in Git are synthetic. The installed Skill launcher
 has completed a real local request; a separate app-server also reports the repo Skill enabled; current-window menu refresh remains unverified.

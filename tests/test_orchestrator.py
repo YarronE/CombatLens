@@ -23,10 +23,27 @@ class RequestTests(unittest.TestCase):
    save_json(root/'local/config.json',{'schema':'combatlens-config/1','adapters':[{'id':'broken','aliases':['game'],'entrypoint':str(adapter)}]})
    with self.assertRaisesRegex(ValueError,'synthetic failure'):analyze('game',root)
    self.assertEqual(pointer.read_bytes(),before)
-   reports=[json.loads(p.read_text()) for p in (root/'local/research').glob('*/run-report.json')];self.assertTrue(any(x['state']=='failed' for x in reports))
+   reports=[json.loads(p.read_text(encoding="utf-8")) for p in (root/'local/research').glob('*/run-report.json')];self.assertTrue(any(x['state']=='failed' for x in reports))
  def test_changed_source_fails_before_activation(self):
   with tempfile.TemporaryDirectory() as folder:
    root=Path(folder);result=demo(root);out=Path(result['research_dir']);(out/'synthetic-source.json').write_text('{}')
    with self.assertRaisesRegex(ValueError,'source_validation_failed'):validate_run(root,out)
+
+ def test_start_reuses_recorded_service_even_if_default_port_is_free(self):
+  import threading
+  from unittest.mock import patch
+  from combatlens import cli
+  from combatlens.runtime.repository import Config,Repository
+  from combatlens.runtime.server import WorkbenchServer
+  with tempfile.TemporaryDirectory() as folder:
+   root=Path(folder);result=demo(root);out=Path(result['research_dir'])
+   server=WorkbenchServer(('127.0.0.1',0),Repository(Config(root,research_dir=out)));server.RequestHandlerClass=cli.LensHandler
+   worker=threading.Thread(target=server.serve_forever,daemon=True);worker.start()
+   try:
+    save_json(out/'service.json',{'port':server.server_port})
+    with patch.object(cli,'ROOT',root),patch.object(cli.subprocess,'Popen') as spawn:
+     service=cli.start(out,port=1)
+     self.assertEqual(service['status'],'reused');self.assertIn(str(server.server_port),service['url']);spawn.assert_not_called()
+   finally:server.shutdown();server.server_close();worker.join(timeout=2)
 
 if __name__=='__main__':unittest.main()

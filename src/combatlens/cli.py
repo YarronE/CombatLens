@@ -22,7 +22,7 @@ def active(root=ROOT):
 def serve(research,port,ready=None):
     server=WorkbenchServer(('127.0.0.1',port),Repository(Config(ROOT,research_dir=research)))
     server.RequestHandlerClass=LensHandler
-    status={'pid':os.getpid(),'port':server.server_port,'url':'http://127.0.0.1:'+str(server.server_port)+'/','run_id':load_json(research/'run-report.json')['id'],'workspace_fingerprint':hashlib.sha256(ROOT.as_posix().lower().encode()).hexdigest()}
+    status={'pid':os.getpid(),'port':server.server_port,'url':'http://127.0.0.1:'+str(server.server_port)+'/','run_id':load_json(research/'run-report.json')['id'],'workspace_fingerprint':hashlib.sha256(ROOT.resolve().as_posix().lower().encode()).hexdigest()}
     if ready:save_json(ready,status)
     print(json.dumps(status),flush=True)
     try:server.serve_forever()
@@ -31,12 +31,24 @@ def serve(research,port,ready=None):
 
 def start(research,port=8877):
     expected=load_json(research/'run-report.json')['id']
+    recorded=research/'service.json'
+    if recorded.is_file():
+        try:
+            saved=load_json(recorded);saved_port=saved.get('port')
+            if type(saved_port) is int and 1<=saved_port<=65535:
+                base='http://127.0.0.1:'+str(saved_port)
+                with urlopen(base+'/api/health',timeout=.5) as response:health=json.load(response)
+                with urlopen(base+'/api/run',timeout=.5) as response:report=json.load(response)
+                fp=hashlib.sha256(ROOT.resolve().as_posix().lower().encode()).hexdigest()
+                if health.get('service')=='combatlens' and health.get('workspace_fingerprint')==fp and report.get('id')==expected:
+                    return {'status':'reused','url':base+'/','pid':health['pid']}
+        except Exception:pass
     for selected in range(port,port+20):
         base='http://127.0.0.1:'+str(selected)
         try:
             with urlopen(base+'/api/health',timeout=.4) as response:health=json.load(response)
             with urlopen(base+'/api/run',timeout=.4) as response:report=json.load(response)
-            fp=hashlib.sha256(ROOT.as_posix().lower().encode()).hexdigest()
+            fp=hashlib.sha256(ROOT.resolve().as_posix().lower().encode()).hexdigest()
             if health.get('service')=='combatlens' and health.get('workspace_fingerprint')==fp and report.get('id')==expected:return {'status':'reused','url':base+'/','pid':health['pid']}
             continue
         except Exception:pass

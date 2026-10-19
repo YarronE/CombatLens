@@ -1,6 +1,6 @@
 # Validation
 
-The release uses 39 Python and 22 Node checks for routing, ambiguity, source
+The release uses 40 Python and 22 Node checks for routing, ambiguity, source
 changes, failed preparation, origin/host restrictions, preview geometry and
 clocks, immutable evidence, conflict handling and atomic save/reopen.
 
