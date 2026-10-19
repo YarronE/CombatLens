@@ -41,4 +41,4 @@ history, saving/reopening and narrow scrolled drag. Pointer cancel/blur/Escape
 coverage is automated against the shared lifecycle. Generic source/analysis
 protection and conflict checks remain. No new game extraction is claimed.
 
-Spec: openspec/changes/add-timeline-manipulation/ (archived after verification).
+Spec: openspec/changes/archive/2026-10-19-add-timeline-manipulation/ (archived after verification).
