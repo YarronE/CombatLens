@@ -21,11 +21,12 @@ export function sampleTimes(values,duration) {
   return [...new Set(values.filter(v=>finite(v)&&v>=0&&v<=duration+tolerance).map(v=>Math.min(v,duration)))].sort((a,b)=>a-b);
 }
 export class PlaybackClock {
-  constructor(onChange=()=>{}) {this.onChange=onChange;this.duration=0;this.time=0;this.speed=1;this.sourceRate=1;this.playing=false;}
-  configure(duration,sourceRate=1) {if(!finite(duration)||duration<0)throw new Error('动画片段时长不合法。');if(!finite(sourceRate)||sourceRate<=0)throw new Error('已确认的原始播放速率不合法。');this.duration=duration;this.sourceRate=sourceRate;this.playing=false;this.seek(0);}
+  constructor(onChange=()=>{}) {this.onChange=onChange;this.duration=0;this.time=0;this.speed=1;this.sourceRate=1;this.playing=false;this.range={start:0,end:0};this.loop=false;}
+  configure(duration,sourceRate=1) {if(!finite(duration)||duration<0)throw new Error('动画片段时长不合法。');if(!finite(sourceRate)||sourceRate<=0)throw new Error('已确认的原始播放速率不合法。');this.duration=duration;this.sourceRate=sourceRate;this.playing=false;this.range={start:0,end:duration};this.loop=false;this.seek(0);}
+  setRange(start,end) {if(!finite(start)||!finite(end)||start<0||end>this.duration+1e-7||end<=start)throw new Error('播放区间需要在当前动画段内，且结束晚于开始。');const bounded=Math.min(end,this.duration);if(bounded<=start)throw new Error('播放区间没有长度。');this.pause();this.range={start,end:bounded};return this.range;}
   seek(time) {if(!finite(time))throw new Error('播放位置必须是有限数值。');this.time=Math.max(0,Math.min(this.duration,time));this.onChange(this.time);return this.time;}
-  tick(delta) {if(!this.playing||!finite(delta)||delta<0)return;this.seek(this.time+delta*this.sourceRate*this.speed);if(this.time>=this.duration)this.playing=false;}
-  toggle() {if(this.duration<=0)return false;if(this.time>=this.duration)this.seek(0);this.playing=!this.playing;return this.playing;}
+  tick(delta) {if(!this.playing||!finite(delta)||delta<0)return;const {start,end}=this.range,length=end-start;if(length<=0){this.pause();return;}const next=(this.time<start||this.time>=end?start:this.time)+delta*this.sourceRate*this.speed;if(next>=end){if(this.loop)this.seek(start+((next-start)%length));else{this.playing=false;this.seek(end);}}else this.seek(next);}
+  toggle() {const {start,end}=this.range;if(end<=start)return false;if(!this.playing&&(this.time<start||this.time>=end))this.seek(start);this.playing=!this.playing;return this.playing;}
   pause() {this.playing=false;}
   step(direction,keys) {this.pause();const times=sampleTimes(keys,this.duration),epsilon=1e-7;const candidate=direction>0?times.find(t=>t>this.time+epsilon):times.filter(t=>t<this.time-epsilon).at(-1);if(candidate===undefined)return false;this.seek(candidate);return true;}
 }

@@ -1,13 +1,13 @@
 # Status
 
-Version 0.4.0, 2026-10-19.
+Version 0.5.0, 2026-10-19.
 
 Implemented request routing, reviewed local adapter registration, independent
 research runs, source checks, stage reports, research overview and the generic
 action workspace. Registered models and animations use source-backed mapping;
 analysis copies save separately with revision conflicts and atomic writes.
 
-Validation passed: 47 Python tests, 45 Node tests, and actual browser checks for
+Validation passed: 47 Python tests, 55 Node tests, and actual browser checks for
 model display, sampling, event positioning, copy save/reopen/reset, desktop and
 narrow layout. Test fixtures in Git are synthetic. The installed Skill launcher
 has completed a real local request; a separate app-server also reports the repo Skill enabled; current-window menu refresh remains unverified.
@@ -50,3 +50,14 @@ Actual browser covered both endpoints after zoom, undo/redo, save/reopen,
 playback to segment end, fixed headers after two-axis scrolling, graph/provenance,
 390px overflow and draft preservation. A fresh synthetic run retained the honest
 no-model fallback. No new extraction, runtime reconstruction or REA change.
+
+Playback iteration: current-segment playback selection, loop with retained
+overshoot, registered-sample frame ruler and exact frame stepping share the
+existing clock. Original event units and copy history remain independent.
+Frame numbering uses registered animation sample times, never inferred runtime
+FPS. Fractional range-frame values interpolate only between adjacent samples.
+Default chrome is reduced: one timeline toolbar, view/file disclosures and folded
+metadata. Necessary labels stay readable; mapping/error states remain explicit.
+Actual browser verified rate-one/rate-two stepping, range stop/loop/handles,
+invalid range, context reset, event undo/save/reopen and narrow scrolled selection.
+47 Python and 55 Node checks pass; no-model synthetic fallback remains honest.

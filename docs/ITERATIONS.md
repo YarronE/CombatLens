@@ -65,3 +65,27 @@ and unsaved form retention on resize. A fresh synthetic run also rendered withou
 models or game theming. Real inputs and screenshots remain private.
 
 Spec: openspec/changes/archive/2026-10-19-fuse-preview-sequencer/ (verified and archived).
+
+
+## 2026-10-19 / Range, loop and frame inspection
+
+Request: playback interval selection, looping, frame ticks and stepping, retaining
+model/timeline linkage; remove repeated small text and honor the owner's minimal
+project scope. The supplied screenshot continues the approved fused layout.
+
+Implemented: bounded clip-time clock with modulo wrap, mapped timeline markers
+and atomic numeric range application, sample-index ruler and exact adjacent-frame
+steps. Registered sample times define frame indexes; no runtime FPS is guessed.
+Frame display preserves native event units, source rate and copy history. Range
+and loop reset with the clip/context and never serialize into research/copies.
+Repeated metadata/limitations and existing view/file tools unfold on demand.
+No new unrelated settings, output format, model/runtime simulation or REA fork.
+
+Observed: 47 Python and 55 Node checks pass. Actual browser covered rate-one and
+rate-two samples, stop at selected end, repeated looping, pointer/keyboard bounds,
+invalid input preservation, source-context reset, event undo/redo and save/reopen,
+390px two-axis scrolling and bounded numeric disclosure. No-model synthetic input
+disables playback/frame controls without supplying a false clock. Case evidence
+and screenshots remain local. Generic generated workspaces use the same renderer.
+
+Spec: openspec/changes/add-playback-range-frames/ (archive after delivery).

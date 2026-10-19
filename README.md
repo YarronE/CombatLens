@@ -49,6 +49,15 @@ Esc、失焦或丢失指针捕获会取消当前拖拽。历史保留当前会�
 模型按已有证据对应时间预览，超出已登记动画片段或单位不对应时会提示缺口。
 更改仅属于分析假设，不写回游戏。查看 [编辑说明](docs/EDITING.md)。
 
+## 播放区间与逐帧查看
+
+拖动标尺上方的两端标记选择播放区间，也可在“区间”中填写数值后应用。
+关闭“循环”时在终点停止，开启后反复播放所选区间。切换动画会重置选择。
+
+标尺可切换“秒 / 帧”，用 ‹ / › 查看上一帧、下一帧。帧号来自登记动画采样
+序列，不假定实机FPS；2×等原始倍率仍按证据换算。播放选区只影响当前预览，
+不会进入事件修改或保存数据。低频视图工具、文件操作与来源说明按需展开。
+
 ## 本地适配器
 
 适配器是经过操作者审查的 Python 文件，提供 `prepare(request, output_dir)`，
@@ -62,7 +71,7 @@ Three保留其原许可证。见 [第三方说明](THIRD_PARTY_NOTICES.md)。
 
 ```sh
 python -m unittest discover -s tests -v
-node --test web/model.test.mjs web/preview-model.test.mjs web/selection-model.test.mjs web/execution-model.test.mjs web/timeline-edit.test.mjs
+node --test web/model.test.mjs web/preview-model.test.mjs web/selection-model.test.mjs web/execution-model.test.mjs web/timeline-edit.test.mjs web/editor-layout.test.mjs web/playback-range.test.mjs
 python scripts/check_publish.py
 ```
 

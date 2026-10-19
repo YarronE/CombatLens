@@ -56,3 +56,33 @@ The collapsed event catalog contains untimed records, additions and hidden-event
 restoration. Its open state survives timeline rerenders. On narrow screens, details
 stack below the dock and the axis scrolls internally. The graph view and source
 dialogs retain their original behavior.
+
+
+## Playback range and frames
+
+Drag the two markers above the ruler to select playback bounds. Focus a marker
+and press Left/Right to adjust it. In frame mode, keys select the adjacent
+registered sample; pointer markers snap to the nearest sample. The Range menu
+applies both numeric values together; Full segment restores the mapped bounds.
+Reversed/outside values keep the previous selection and show a concise error.
+Range gestures cancel through the existing capture lifecycle and restore time.
+
+Play starts inside the range. With Loop off it stops exactly at the end; with
+Loop on it wraps and retains overshoot. Source rate and observation speed apply
+once. Changing clip/subject resets range and looping. Paused seeks and frame
+inspection may leave the selected playback interval. Range/loop are transient
+preview settings and never enter copy JSON or undo history.
+
+Choose seconds or frames on the timeline. Frames are zero-based indices of the
+registered animation sampling sequence, not runtime FPS or assumed uniform time.
+Previous/next frame seek exact samples; frame ruler positions use the proven
+clip/action mapping, including trimmed and rate-two segments. Fractional range
+values preserve subframe selection by interpolating neighboring registered times.
+The existing event snap and stored event units remain unchanged by display mode.
+Missing mapping disables linked range/frame display; missing registered samples
+disables frame stepping. No model disables playback. All evidence remains in
+Action information / Asset sources; normal limitations no longer fill the dock.
+
+View tools and file operations unfold on demand. Graph, source dialogs, original
+values and analysis forms remain available. The working surface adds only range,
+loop and frame controls requested for this iteration.

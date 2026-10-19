@@ -7,7 +7,7 @@
 - 个人风格为 `E:/Ethans/00_System/Context/05_Personal-Style.md`。
 - 传递约定为 `E:/Ethans/00_System/跨项目协作/instructions.md`。
 - 当前设计与本机案例记录见知识库 GameReverseWorkbench 项目目录。
-- 当前任务为 `openspec/changes/archive/2026-10-19-fuse-preview-sequencer/`，状态见 `docs/STATUS.md`。
+- 当前任务为 `openspec/changes/add-playback-range-frames/`，状态见 `docs/STATUS.md`。
 
 ## 创建与同步约定
 
@@ -33,3 +33,10 @@
 2026-10-19 模型与Timeline融合为一个编辑窗口，参考UE5 Sequencer的紧凑面板。
 分隔条、共享播放和固定轨道标尺均使用既有时钟，通用布局进入共享渲染器。
 本地案例只用于验收，截图进入知识库项目assets。窗口整合无需修改REA。
+
+
+2026-10-19 本轮按用户截图延续已确认布局，仅加播放区间、循环、帧刻度与逐帧。
+按个人风格和前端规范去掉重复小字，低频工具与证据说明折叠；不增加无需求功能。
+帧号使用登记动画采样序列，不推定实机FPS；播放状态不进入分析副本或事件历史。
+中央传递范围仍为资源与程序取证、实例限定和多段时钟；Unity、VFX及录像规则的
+具体制作参数不适用于本次浏览器播放。截图和案例保留本地，通用代码验证后推送。

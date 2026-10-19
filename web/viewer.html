@@ -14,7 +14,7 @@
   <a class="skip" href="#workspaces">进入对象窗口</a>
   <header class="page-header">
     <img class="workspace-art" data-theme-image hidden alt="">
-    <div><h1 data-theme-title>动作工作区</h1><p id="identity" class="muted">读取本地研究数据</p></div>
+    <div><h1 data-theme-title>动作工作区</h1></div>
     <div class="header-actions">
       <div class="mode-switch" role="group" aria-label="查看模式"><button id="mode-original" aria-pressed="true">原始事件</button><button id="mode-analysis" aria-pressed="false">分析副本</button></div>
       <div class="history-controls" role="group" aria-label="编辑历史"><button id="undo-edit" disabled title="Ctrl/Cmd+Z">撤销</button><button id="redo-edit" disabled title="Ctrl/Cmd+Shift+Z 或 Ctrl+Y">重做</button></div>
@@ -31,26 +31,26 @@
       <label class="visually-hidden" for="object-search">搜索对象或技能 ID</label><input id="object-search" type="search" placeholder="搜索对象或技能 ID" autocomplete="off">
       <p id="object-count" class="muted small"></p>
       <div id="object-browser"></div>
-      <div class="data-actions"><h3>原始数据与副本</h3><button id="browse-research">研究记录</button><button id="export-analysis" disabled>导出分析 JSON</button><button id="import-analysis">导入分析 JSON</button><button id="save-as" disabled>另存分析副本</button><input id="import-file" type="file" accept=".json,application/json" hidden></div>
+      <details class="data-actions"><summary>文件</summary><button id="browse-research">研究记录</button><button id="export-analysis" disabled>导出分析 JSON</button><button id="import-analysis">导入分析 JSON</button><button id="save-as" disabled>另存分析副本</button><input id="import-file" type="file" accept=".json,application/json" hidden></details>
     </aside>
     <main id="workspaces">
-      <div class="workspace-heading"><h2 id="workspace-title">选择角色或 Boss</h2><p id="data-state" class="muted small">静态证据</p></div>
-      <div id="subject-selection" class="selection-bar"><label>技能招式<select id="action-select" aria-label="技能招式"></select></label><label id="variant-field" hidden>证据版本<select id="variant-select" aria-label="证据版本"></select></label></div>
-      <p id="selection-summary" class="selection-summary muted small"></p>
+      <div class="workspace-heading"><h2 id="workspace-title">选择角色或 Boss</h2></div>
+      <div id="subject-selection" class="selection-bar"><label>技能招式<select id="action-select" aria-label="技能招式"></select></label></div>
+
       <section id="action-editor" class="action-editor" aria-label="动作编辑器">
         <section id="asset-preview" aria-label="真实模型与动画"></section>
         <div id="editor-divider" class="editor-divider" role="separator" aria-label="调整模型与时间轴高度" aria-orientation="horizontal" aria-valuemin="25" aria-valuemax="75" aria-valuenow="48" tabindex="0"></div>
         <section class="sequencer-dock" aria-label="Sequencer 时间轴">
-          <div id="editor-transport" class="editor-transport"><strong class="sequencer-title">Sequencer</strong><output id="timeline-time" aria-label="动作时间">动作坐标未对应</output></div>
+          <div id="editor-transport" class="editor-transport"><output id="timeline-time" aria-label="动作时间">动作坐标未对应</output></div>
           <div class="windows"><section id="window-character" class="role-window" data-role="character" aria-label="角色窗口"></section><section id="window-boss" class="role-window" hidden data-role="boss" aria-label="Boss 窗口"></section></div>
         </section>
       </section>
     </main>
       <section class="inspector" aria-labelledby="inspector-title">
         <div class="inspector-header"><h2 id="inspector-title">事件详情</h2><span id="inspector-kind" class="muted small"></span></div>
-        <details class="asset-inspector" open><summary>预览资产与片段</summary><div id="preview-asset-details"></div></details>
-        <div class="inspector-columns"><div id="original-detail"><p class="muted">选择事件或行为图节点，查看原值与来源。</p></div>
-          <div id="editor-pane" hidden><h3>分析副本</h3><form id="event-editor"><div class="time-inputs"><label>开始<input id="edit-start" type="number" step="any" placeholder="未知"></label><label>结束<input id="edit-end" type="number" step="any" placeholder="时间点留空"></label><label>单位<select id="edit-unit"><option value="">未知</option><option value="seconds">秒</option><option value="frames">帧</option><option value="game_seconds">游戏秒</option><option value="source_units">来源单位</option></select></label></div><label>分析备注<textarea id="edit-note" rows="2"></textarea></label><label>修改理由<textarea id="edit-reason" rows="2" placeholder="说明时间假设或分析依据"></textarea></label><div class="editor-actions"><button type="submit">应用修改</button><button type="button" id="reset-event">恢复原始事件</button></div><p class="muted small">修改只进入分析副本。原始值与来源保持可查。</p></form></div>
+        <details class="action-info"><summary>动作信息</summary><p id="identity"></p><p id="selection-summary"></p><p id="data-state"></p><label id="variant-field" hidden>证据版本<select id="variant-select" aria-label="证据版本"></select></label></details><details class="asset-inspector" open><summary>动画</summary><div id="preview-asset-details"></div></details>
+        <div class="inspector-columns"><div id="original-detail"><p class="muted">选择事件查看详情</p></div>
+          <div id="editor-pane" hidden><h3>分析副本</h3><form id="event-editor"><div class="time-inputs"><label>开始<input id="edit-start" type="number" step="any" placeholder="未知"></label><label>结束<input id="edit-end" type="number" step="any" placeholder="时间点留空"></label><label>单位<select id="edit-unit"><option value="">未知</option><option value="seconds">秒</option><option value="frames">帧</option><option value="game_seconds">游戏秒</option><option value="source_units">来源单位</option></select></label></div><label>分析备注<textarea id="edit-note" rows="2"></textarea></label><label>修改理由<textarea id="edit-reason" rows="2" placeholder="说明时间假设或分析依据"></textarea></label><div class="editor-actions"><button type="submit">应用修改</button><button type="button" id="reset-event">恢复原始事件</button></div></form></div>
         </div>
         <div id="event-catalog"></div>
       </section>
