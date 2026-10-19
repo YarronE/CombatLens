@@ -7,7 +7,7 @@
 - 个人风格为 `E:/Ethans/00_System/Context/05_Personal-Style.md`。
 - 传递约定为 `E:/Ethans/00_System/跨项目协作/instructions.md`。
 - 当前设计与本机案例记录见知识库 GameReverseWorkbench 项目目录。
-- 当前任务为 `openspec/changes/archive/2026-10-19-add-instrument-presentation/`，状态见 `docs/STATUS.md`。
+- 当前任务为 `openspec/changes/add-timeline-manipulation/`，状态见 `docs/STATUS.md`。
 
 ## 创建与同步约定
 
@@ -24,3 +24,7 @@
 已核对中央传递记录：只用资源和程序取证；视觉方向以本轮用户指定为准；报告节点与
 完工剩余时间；保留 Notify 实例条件和多段动画时钟校验。图像通道、Unity 绘制和
 战斗演出接触帧记录不适用于本次 HTML 主题更改。未改变动作恢复及来源匹配规则。
+
+2026-10-19 后续实现事件拖拽、区间调整和撤销重做，保持模型动画联动。
+用户允许在有明确收益时克隆REA二次开发；本轮瓶颈在客户端交互，未修改REA。
+通用交互与合成检查进入工程，案例数据和验证截图仍留本地。

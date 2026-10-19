@@ -28,3 +28,19 @@ fit 390px (document 375px). Action page fit 1440px (document 1425px), retained
 object selection, real model sampling and event-to-animation positioning. The
 unconfigured synthetic page had no broken image and fit its viewport. No new
 unpacking or combat conclusion is claimed for this visual iteration.
+
+Timeline editing (2026-10-19): 47 Python and 40 Node checks pass. Eighteen
+synthetic editing checks cover snap/bounds, history branching/checkpoints, copy
+and event scope, pointer ownership/cancel/blur/lost capture, and overlap lanes.
+Actual browser tested body movement and both edges, undo/redo with animation,
+keyboard nudging and text-field native undo, form edits, add/delete, unhide/reset,
+save isolation and reload. Saving retained current server revision while history
+moved around its checkpoint. A 390px layout stayed within its document width and
+pointer movement worked after horizontal scroll. Registered real model timelines
+were checked in both character and boss contexts. Source hashes revalidated.
+
+Browser-discovered issues fixed and rechecked: overlapping event targetability,
+form controls remaining disabled after a gesture, and timeline scroll reset on
+selection. Hidden drag captions use display:none so they cannot enlarge inactive
+SVG hit bounds. Cancellations are deterministic lifecycle checks; no physical
+hardware touch validation is claimed. Public fixtures remain synthetic.

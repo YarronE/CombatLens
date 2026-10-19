@@ -16,12 +16,13 @@
     <div><h1 data-theme-title>动作工作区</h1><p id="identity" class="muted">读取本地研究数据</p></div>
     <div class="header-actions">
       <div class="mode-switch" role="group" aria-label="查看模式"><button id="mode-original" aria-pressed="true">原始事件</button><button id="mode-analysis" aria-pressed="false">分析副本</button></div>
+      <div class="history-controls" role="group" aria-label="编辑历史"><button id="undo-edit" disabled title="Ctrl/Cmd+Z">撤销</button><button id="redo-edit" disabled title="Ctrl/Cmd+Shift+Z 或 Ctrl+Y">重做</button></div>
       <button id="save-analysis" class="primary" disabled>保存分析 JSON</button>
       <button id="open-analyses">打开副本</button>
     </div>
   </header>
   <p id="theme-status" class="theme-status" role="status" hidden></p>
-  <div class="status-strip"><span id="copy-status">原始事件只读</span><span id="notice" role="status" aria-live="polite"></span></div>
+  <div class="status-strip"><span id="copy-status">原始事件只读</span><span id="history-status" class="history-status" aria-live="polite"></span><span id="notice" role="status" aria-live="polite"></span></div>
   <div class="app-shell">
     <aside class="sidebar" aria-label="研究对象">
       <h2>选择对象</h2>

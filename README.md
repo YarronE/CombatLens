@@ -35,6 +35,20 @@ REA 提供程序与证据调查；游戏格式支持由适配器声明。工具�
 - 3C、数值、资源与AI的已恢复规则，以及明确的未知范围。
 - 独立分析副本、参数修改、来源保护、冲突检测和保存重开。
 
+## Timeline 直接编辑
+
+进入动作工作区并切换到“分析副本”。拖动事件本体可整体移动，拖动区间两端
+可调整开始或结束。原始事件保持只读。重叠事件自动分行，原始轨道字段不变。
+时间吸附可选择细步长、粗步长或不吸附；方向键微调，Shift 增大步长。
+
+使用“撤销 / 重做”、Ctrl/Cmd+Z、Ctrl/Cmd+Shift+Z 或 Ctrl+Y 回放操作。
+输入框保留原生撤销。一次拖拽对应一步；表单、新增、隐藏和恢复也进入历史。
+Esc、失焦或丢失指针捕获会取消当前拖拽。历史保留当前会话最近100步，
+切换或重新打开另一副本时清空。保存后的时间和参数可以重开，服务端修订号不回退。
+
+模型按已有证据对应时间预览，超出已登记动画片段或单位不对应时会提示缺口。
+更改仅属于分析假设，不写回游戏。查看 [编辑说明](docs/EDITING.md)。
+
 ## 本地适配器
 
 适配器是经过操作者审查的 Python 文件，提供 `prepare(request, output_dir)`，
@@ -48,7 +62,7 @@ Three保留其原许可证。见 [第三方说明](THIRD_PARTY_NOTICES.md)。
 
 ```sh
 python -m unittest discover -s tests -v
-node --test web/model.test.mjs web/preview-model.test.mjs web/selection-model.test.mjs
+node --test web/model.test.mjs web/preview-model.test.mjs web/selection-model.test.mjs web/execution-model.test.mjs web/timeline-edit.test.mjs
 python scripts/check_publish.py
 ```
 
