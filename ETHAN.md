@@ -7,7 +7,7 @@
 - 个人风格为 `E:/Ethans/00_System/Context/05_Personal-Style.md`。
 - 传递约定为 `E:/Ethans/00_System/跨项目协作/instructions.md`。
 - 当前设计与本机案例记录见知识库 GameReverseWorkbench 项目目录。
-- 当前任务为 `openspec/changes/archive/2026-10-19-add-playback-range-frames/`，状态见 `docs/STATUS.md`。
+- 当前任务为 `openspec/changes/add-designer-event-details/`，状态见 `docs/STATUS.md`。
 
 ## 创建与同步约定
 
@@ -40,3 +40,10 @@
 帧号使用登记动画采样序列，不推定实机FPS；播放状态不进入分析副本或事件历史。
 中央传递范围仍为资源与程序取证、实例限定和多段时钟；Unity、VFX及录像规则的
 具体制作参数不适用于本次浏览器播放。截图和案例保留本地，通用代码验证后推送。
+
+2026-10-19 本轮按用户明确范围实现Notify策划解释与点击定位动画采样帧。
+先写工程设计，再实现；未进入Plan mode。解释只使用明确规则绑定及原始实例条件，
+作用、条件和数值缺少依据时显示未确认。技能阶段与Notify回调分开，分析副本标明
+原始实例证据。点击使用当前已证实片段内映射起点后的首个采样，拖拽与历史保留
+原有精确时间。解释覆盖层不改变研究指纹或旧副本；所有底层依赖含表快照需核验。
+通用渲染与接口进入仓库，案例解释、资源与截图仅本地。本轮无需修改REA。

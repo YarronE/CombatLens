@@ -1,4 +1,4 @@
-import {registeredFrames,framePosition,frameTime} from './frame-model.js';
+import {registeredFrames,framePosition,frameTime,eventFrameTarget} from './frame-model.js';
 import * as THREE from './vendor/three-r180/build/three.module.js';
 import {GLTFLoader} from './vendor/three-r180/addons/loaders/GLTFLoader.js';
 import {OrbitControls} from './vendor/three-r180/addons/controls/OrbitControls.js';
@@ -140,6 +140,7 @@ export class AssetViewer {
   applyRangeInputs(){const state=this.playbackState();if(!state)return;try{const values=['start','end'].map(edge=>{const raw=this.rangeInputs[edge].value;if(raw.trim()==='')throw new Error('填写播放区间。');const value=Number(raw);if(!finite(value))throw new Error('区间需要有效数值。');if(this.displayUnit!=='frames')return value;const time=frameTime(this.frames,value);if(time===null)throw new Error('帧号超出登记序列。');return clipToAction(time,this.clip);});if(values.some(t=>t===null))throw new Error('区间超出当前动画段。');this.setActionRange(...values);this.setMessage('');}catch(error){this.refreshPlaybackControls();this.setMessage(error.message);}}
   resetPlaybackRange(){const state=this.playbackState();if(state){this.setActionRange(state.mapping.action_in,state.mapping.action_out);this.setMessage('');}}
 
+  seekEventFrame(time,unit){this.clock.pause();this.updateControls();const target=eventFrameTarget(this.clip,time,unit,this.clock.duration);if(target.status!=='ready')return target;this.clock.pause();this.clock.seek(target.clipTime);this.updateControls();return target;}
   seekAction(time,unit) {if(!this.clip)return false;if(!clockMapping(this.clip,this.clock.duration)){this.setMessage('所选 Timeline 时钟尚未对应该动画。');return false;}const mapped=actionToClip(time,unit,this.clip);if(mapped===null){this.setMessage('该时间尚不能对应当前动画片段。');return false;}this.clock.pause();this.clock.seek(mapped);this.updateControls();return true;}
   runFrame() {
     cancelAnimationFrame(this.raf);const frame=now=>{if(!this.renderer||this.contextLost)return;const delta=this.lastFrame===null?0:Math.max((now-this.lastFrame)/1000,0);this.lastFrame=now;this.clock.tick(delta);this.updateControls();this.controls?.update();this.renderer.render(this.scene,this.camera);this.raf=requestAnimationFrame(frame);};this.lastFrame=null;this.raf=requestAnimationFrame(frame);

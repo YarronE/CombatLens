@@ -89,3 +89,27 @@ disables playback/frame controls without supplying a false clock. Case evidence
 and screenshots remain local. Generic generated workspaces use the same renderer.
 
 Spec: openspec/changes/archive/2026-10-19-add-playback-range-frames/ (verified and archived).
+
+## 2026-10-19 / Designer-facing Notify details
+
+Request: explain Notify effects, conditions and related values for combat designers;
+select the corresponding animation frame, retain a minimal interface and never
+guess missing evidence. Synchronize generic improvements and keep the pilot local.
+
+Implemented optional reviewed guides bound to exact Build, registered execution
+summary and all underlying source/table-proof hashes. Explanations use explicit
+rule bindings plus original instance conditions. Numeric references preserve zero,
+false and unknown units; analysis overrides cannot alter evidence eligibility.
+Skill-stage evidence remains separate. Compact effect/condition/value blocks lead
+the inspector, with raw proof and editing disclosures below. Event clicks pause
+and select the first registered sample at/after mapped start in the proven current
+segment. Existing exact-time gestures/history and sample-based playback remain.
+
+Observed: 56 Python and 66 Node tests passed. Actual browser checked known and
+unknown same-class instances, critical branch limits, rate-two sampling, early-load
+selection, playback pause and frame step, original-vs-analysis evidence, undo/redo,
+save/reopen, 390px width and no-guide/no-model fallback. Original package fingerprint
+and source hashes remain unchanged. No new extraction, runtime observation or REA
+fork is claimed. All case notes, evidence and screenshots remain local.
+
+Spec: openspec/changes/add-designer-event-details/ (validated; delivery pending).

@@ -61,3 +61,43 @@ Hero is optional. Only digest-checked local PNG/JPEG up to 12 MiB is served.
 Paths, scripts and external image URLs are not accepted by the browser contract.
 Missing/invalid themes use a generic layout with a diagnostic. Keep all game
 theme manifests, visual assets, sampling reports and screenshots out of public Git.
+
+## Optional reviewed event explanations
+
+Provide a private `local/interpretations/<adapter-id>/event-guide.json`; subsequent
+runs inherit it through run-report.adapter. A research-run `event-guide.json` takes
+precedence for a pinned interpretation. Missing/invalid guides leave details
+explicitly unknown. Guides are presentation overlays and do not change package
+fingerprints or existing analysis copies. GET /api/event-guide uses the same local
+API authorization as research endpoints and returns no filesystem paths.
+
+The JSON schema is `combatlens-event-guide/1`. Required fields:
+
+- `game_build`: exact current Build.
+- `execution_source`: registered execution summary `id` and exact byte `sha256`.
+- `evidence_files`: complete unique `{name, path, sha256}` records for the
+  summary's source_files, plus every rules[].table_proofs snapshot. For a table,
+  name is `table/<basename>#<first 12 characters of source_sha256>`. Paths must
+  remain in the registered summary's approved roots; hashes must be current.
+- `entries`: unique reviewed interpretations keyed by an existing `rule_id`.
+
+Each entry has title, effect, nonempty conditions (string array), boundary and
+numbers. A number is `{label, scope, path, unit, note}`; scope is `rule` or `event`,
+and path is an own-field dotted path into the bound rule or original raw_value.
+There are no literal/default numeric values. Missing fields remain unknown.
+An optional integer action_id and scalar required_values further narrow original
+instances; they cannot expand a rule's eligibility or refer to analyst overrides.
+
+The frontend requires explicit event.execution_rule_ids and the execution rule's
+existing class/action/Buff/required-value checks. Only static_cil_verified and
+asset_data_cil_join_verified rules can explain effects. No class-name heuristic
+is used. Stage rules are displayed separately from Notify callback explanations.
+Every selection rechecks summary and dependency freshness. A changed/missing
+dependency suppresses interpretation rather than retaining an old verified badge.
+
+Author explanations from reviewed callback and table evidence. State branch
+exceptions, duration modifiers and incomplete cleanup paths where relevant. The
+reader verifies provenance; it cannot prove that prose faithfully describes code.
+Review is required before local registration. Real case guides and their evidence
+remain private; synthetic tests document the public contract. No target game code
+executes when a guide is read, and no new extraction or runtime simulation is implied.

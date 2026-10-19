@@ -1,13 +1,13 @@
 # Status
 
-Version 0.5.0, 2026-10-19.
+Version 0.6.0, 2026-10-19.
 
 Implemented request routing, reviewed local adapter registration, independent
 research runs, source checks, stage reports, research overview and the generic
 action workspace. Registered models and animations use source-backed mapping;
 analysis copies save separately with revision conflicts and atomic writes.
 
-Validation passed: 47 Python tests, 55 Node tests, and actual browser checks for
+Validation passed: 56 Python tests, 66 Node tests, and actual browser checks for
 model display, sampling, event positioning, copy save/reopen/reset, desktop and
 narrow layout. Test fixtures in Git are synthetic. The installed Skill launcher
 has completed a real local request; a separate app-server also reports the repo Skill enabled; current-window menu refresh remains unverified.
@@ -61,3 +61,15 @@ metadata. Necessary labels stay readable; mapping/error states remain explicit.
 Actual browser verified rate-one/rate-two stepping, range stop/loop/handles,
 invalid range, context reset, event undo/save/reopen and narrow scrolled selection.
 47 Python and 55 Node checks pass; no-model synthetic fallback remains honest.
+
+Event-detail iteration: reviewed local guides explain original Notify effects,
+conditions and field-backed numbers. Explicit bindings and original instance
+predicates prevent same-class or analyst-override inference. Build, summary and
+all declared/table-proof dependencies are checked on selection. Unknown mechanisms
+remain unknown; stage evidence is separate. Compact details fold raw fields.
+Event clicks pause at the first registered sample at/after mapped start inside
+the current segment; drag/history keep exact-time behavior. Browser verified
+known/unknown instances, rate-two mapping, early-load selection, playback pause,
+frame step, analysis save/reopen and 390px layout. Synthetic no-guide/no-model
+fallback remains explicit. Current regressions: 56 Python and 66 Node passed.
+All private guides, game inputs and screenshots stay outside public Git.

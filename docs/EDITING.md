@@ -86,3 +86,25 @@ Action information / Asset sources; normal limitations no longer fill the dock.
 View tools and file operations unfold on demand. Graph, source dialogs, original
 values and analysis forms remain available. The working surface adds only range,
 loop and frame controls requested for this iteration.
+
+## Event details and frame selection
+
+Selecting an event pauses preview and seeks the first registered animation sample
+at or after its mapped start (with a small floating-point comparison tolerance).
+The sample must lie within the currently proven segment. The displayed frame is
+an animation sampling index, not a runtime callback observation. No inferred FPS
+or cross-segment search is used. Unavailable mapping retains the pose and explains
+the gap. Dragging, scrubbing and history retain their existing exact-time behavior.
+Late validation responses cannot move a newer selection or another subject.
+
+The compact inspector shows effect, conditions and numbers only when a reviewed
+local guide matches current Build, execution summary, underlying evidence and the
+original event's explicit rule binding. Original class, action, Buff and required
+values restrict eligibility; analyst overrides cannot establish evidence. Values
+come from referenced original fields, preserving zero and false. Missing values
+or units stay unknown. Skill-stage rules appear separately in the evidence fold.
+
+In analysis mode, explanations are labeled original-instance evidence. The sampled
+position follows the effective analysis time; changing parameters does not simulate
+the callback. Raw fields, sources and the edit form unfold on demand. Guide data
+never enters research packages, saved copies or undo history.

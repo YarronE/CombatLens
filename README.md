@@ -58,6 +58,14 @@ Esc、失焦或丢失指针捕获会取消当前拖拽。历史保留当前会�
 序列，不假定实机FPS；2×等原始倍率仍按证据换算。播放选区只影响当前预览，
 不会进入事件修改或保存数据。低频视图工具、文件操作与来源说明按需展开。
 
+## 事件详情与动画定位
+
+点击事件，查看已核验的作用、触发条件和关联数值，并暂停到对应动画采样帧。
+定位使用映射起点之后的首个登记采样；帧号不代表游戏运行时回调发生帧。
+缺少执行证据、实例条件不符或来源变化时显示“未确认”，不根据 Notify 名称猜测。
+数值保留原单位和适用范围，原始字段与技术依据按需展开。分析副本中的解释明确
+标为原始实例证据，不把修改参数当成执行结果。本地解释格式见适配契约。
+
 ## 本地适配器
 
 适配器是经过操作者审查的 Python 文件，提供 `prepare(request, output_dir)`，
@@ -71,7 +79,7 @@ Three保留其原许可证。见 [第三方说明](THIRD_PARTY_NOTICES.md)。
 
 ```sh
 python -m unittest discover -s tests -v
-node --test web/model.test.mjs web/preview-model.test.mjs web/selection-model.test.mjs web/execution-model.test.mjs web/timeline-edit.test.mjs web/editor-layout.test.mjs web/playback-range.test.mjs
+node --test web/model.test.mjs web/preview-model.test.mjs web/selection-model.test.mjs web/execution-model.test.mjs web/timeline-edit.test.mjs web/editor-layout.test.mjs web/playback-range.test.mjs web/designer-model.test.mjs
 python scripts/check_publish.py
 ```
 

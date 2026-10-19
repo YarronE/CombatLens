@@ -53,9 +53,9 @@ export function inspectGLB(buffer) {
 export class PreviewSeekGate {
   constructor(){this.intent=0;}
   cancel(){this.intent++;}
-  async seek(viewer,context,time,unit,isCurrent=()=>true){
+  async seek(viewer,context,time,unit,isCurrent=()=>true,{frame=false}={}){
     const intent=++this.intent,ready=await viewer.setContext(context);
     if(intent!==this.intent||!ready||!isCurrent()||viewer.context?.objectId!==context.objectId||viewer.context?.sequenceId!==context.sequenceId||!viewer.clip)return false;
-    return viewer.seekAction(time,unit);
+    return frame?viewer.seekEventFrame(time,unit):viewer.seekAction(time,unit);
   }
 }
