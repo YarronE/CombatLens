@@ -14,6 +14,13 @@ Python 3.11+，查看与合成演示无需 pip 安装。打开 `--open` 返回�
 该参数启动服务，不自动操控浏览器。未登记的游戏会报告适配缺口。
 新 clone 只有合成演示，不包含任何真实游戏案例、适配器、模型或解包结果。
 
+## 是否需要 REA
+
+查看已有研究和合成演示只需本工具、Python 与浏览器。使用 Agent 调用 REA
+调查新游戏程序时，另行连接 REA MCP；已有连接可直接复用。CombatLens 是
+独立工具，通过 Agent 配合 REA，未内置或修改分发 REA。解包还需要适配器对应的
+格式读取器与本地输入。安装分工见 [安装说明](docs/INSTALLATION.md)。
+
 ## Agent 一句话入口
 
 使用 `skills/combatlens/SKILL.md`，在目标 Agent 的技能安装方式中登记该目录。

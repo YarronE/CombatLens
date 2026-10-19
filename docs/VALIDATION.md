@@ -1,6 +1,6 @@
 # Validation
 
-The release uses 40 Python and 22 Node checks for routing, ambiguity, source
+The release uses 47 Python and 22 Node checks for routing, ambiguity, source
 changes, failed preparation, origin/host restrictions, preview geometry and
 clocks, immutable evidence, conflict handling and atomic save/reopen.
 
@@ -19,3 +19,12 @@ Skill frontmatter and unique registry entry were checked manually. The optional
 quick_validate helper could not run because PyYAML was absent. Its local launcher
 and the real request flow were executed successfully. A separate app-server skills/list reports the repo Skill enabled. Current-window
 menu discovery and clean-machine restoration are not claimed.
+
+Presentation validation (2026-10-19): seven additional synthetic tests cover
+inheritance, defaults, run override, traversal, symlink escape, malformed colors,
+changed digest, attribution and live API fallback. All 47 Python and 22 Node
+checks pass. Actual browser loaded local artwork and bundled Oxanium; both pages
+fit 390px (document 375px). Action page fit 1440px (document 1425px), retained
+object selection, real model sampling and event-to-animation positioning. The
+unconfigured synthetic page had no broken image and fit its viewport. No new
+unpacking or combat conclusion is claimed for this visual iteration.

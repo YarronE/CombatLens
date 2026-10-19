@@ -13,3 +13,12 @@ ignored `local/`. Do not commit them, even to examples or test fixtures.
 
 开始任务先读本项目 ETHAN.md，再读取知识库通用规范及相关传递记录。
 收尾回传设计、验证与可复用信息，工程实现采用 OpenSpec。
+
+## Iteration policy
+
+Use the local pilot to validate accepted improvements, then update the shared
+renderer, adapter contract and synthetic regression coverage. Record requests
+and observed results in OpenSpec and docs/ITERATIONS.md. Do not ship case IDs,
+assets or findings in those records. New generated workspaces use the current
+renderer and inherit reviewed local presentation by adapter ID. Preserve unknown
+values and evidence boundaries during visual work.

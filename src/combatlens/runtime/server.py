@@ -13,6 +13,7 @@ from urllib.parse import unquote, urlsplit
 from .repository import Config, Repository, within
 from .validation import WorkbenchError
 from .preview import PreviewRepository
+from .presentation import resolve as resolve_presentation
 
 
 class WorkbenchServer(ThreadingHTTPServer):
@@ -70,6 +71,23 @@ class Handler(BaseHTTPRequestHandler):
                 self.reply(200, {"service": "combatlens", "api_version": 1,
                                  "pid": os.getpid(), "port": self.server.server_port,
                                  "workspace_fingerprint": hashlib.sha256(workspace).hexdigest()})
+            elif path in {"/api/presentation", "/api/presentation/hero"}:
+                theme, asset = resolve_presentation(repository)
+                if path == "/api/presentation":
+                    self.reply(200, theme)
+                elif asset is None:
+                    raise WorkbenchError("Registered presentation image unavailable.", status=404, code="not_found")
+                else:
+                    raw = asset.read_bytes()
+                    if hashlib.sha256(raw).hexdigest() != theme['hero']['sha256']:
+                        raise WorkbenchError("Presentation image changed.", status=409, code="stale_source")
+                    self.send_response(200)
+                    self.send_header("Content-Type", "image/png" if asset.suffix.lower()==".png" else "image/jpeg")
+                    self.send_header("Content-Length", str(len(raw)))
+                    self.send_header("Cache-Control", "no-store")
+                    self.send_header("X-Content-Type-Options", "nosniff")
+                    self.end_headers()
+                    self.wfile.write(raw)
             elif path == "/api/research":
                 self.reply(200, repository.research_response())
             elif path == "/api/timelines":
@@ -121,7 +139,7 @@ class Handler(BaseHTTPRequestHandler):
         path = (web_root / relative).resolve()
         if not within(path, web_root) or not path.is_file():
             raise WorkbenchError("Static file was not found.", status=404, code="not_found")
-        if path.suffix.lower() not in {".html", ".js", ".css", ".svg", ".png", ".jpg", ".ico", ".woff2", ".json"}:
+        if path.suffix.lower() not in {".html", ".js", ".css", ".svg", ".png", ".jpg", ".ico", ".woff2", ".ttf", ".json"}:
             raise WorkbenchError("Static file type rejected.", status=403, code="path_rejected")
         raw = path.read_bytes()
         self.send_response(200)

@@ -8,3 +8,8 @@ The generic evidence, timeline and preview runtime was adapted from an earlier
 prototype authored by the same copyright owner, revision
 `822ac67fbae2b7959cebd4b9e8943a88796ffceb`. Game-specific presentation and rule
 bindings were replaced by adapter-provided metadata and predicates.
+
+## Oxanium
+
+Oxanium by Severin Meyer / The Oxanium Project Authors, SIL OFL 1.1.
+License and source digest: web/vendor/oxanium/. Bundled for offline use.

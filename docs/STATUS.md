@@ -1,13 +1,13 @@
 # Status
 
-Version 0.1.0, 2026-10-19.
+Version 0.2.0, 2026-10-19.
 
 Implemented request routing, reviewed local adapter registration, independent
 research runs, source checks, stage reports, research overview and the generic
 action workspace. Registered models and animations use source-backed mapping;
 analysis copies save separately with revision conflicts and atomic writes.
 
-Validation passed: 40 Python tests, 22 Node tests, and actual browser checks for
+Validation passed: 47 Python tests, 22 Node tests, and actual browser checks for
 model display, sampling, event positioning, copy save/reopen/reset, desktop and
 narrow layout. Test fixtures in Git are synthetic. The installed Skill launcher
 has completed a real local request; a separate app-server also reports the repo Skill enabled; current-window menu refresh remains unverified.
@@ -26,3 +26,9 @@ Universal extraction, original-game writeback and game-runtime simulation are
 not implemented.
 
 Public remote verification is recorded at delivery in the owner's project log.
+
+Presentation iteration: both pages share Swiss grid and aerospace-inspired
+controls with bundled OFL Oxanium. Reviewed local game imagery, attribution and
+hex palette inherit by adapter ID; missing/invalid inputs retain offline defaults.
+No game image ships in Git. Installation roles are explained in INSTALLATION.md.
+Requests and observed outcomes: ITERATIONS.md.

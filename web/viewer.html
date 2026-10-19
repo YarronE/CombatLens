@@ -6,17 +6,21 @@
   <meta name="color-scheme" content="dark">
   <title>CombatLens 动作工作区</title>
   <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./instrument.css">
 </head>
-<body>
+<body class="workbench">
+  <div class="brand-bar"><a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span>CombatLens</a><nav aria-label="工作区域"><a href="/">研究概览</a><a href="viewer.html" aria-current="page">动作工作区</a></nav></div>
   <a class="skip" href="#workspaces">进入对象窗口</a>
   <header class="page-header">
-    <div><h1>CombatLens 动作工作区</h1><p id="identity" class="muted">读取本地研究数据</p></div>
+    <img class="workspace-art" data-theme-image hidden alt="">
+    <div><h1 data-theme-title>动作工作区</h1><p id="identity" class="muted">读取本地研究数据</p></div>
     <div class="header-actions">
       <div class="mode-switch" role="group" aria-label="查看模式"><button id="mode-original" aria-pressed="true">原始事件</button><button id="mode-analysis" aria-pressed="false">分析副本</button></div>
       <button id="save-analysis" class="primary" disabled>保存分析 JSON</button>
       <button id="open-analyses">打开副本</button>
     </div>
   </header>
+  <p id="theme-status" class="theme-status" role="status" hidden></p>
   <div class="status-strip"><span id="copy-status">原始事件只读</span><span id="notice" role="status" aria-live="polite"></span></div>
   <div class="app-shell">
     <aside class="sidebar" aria-label="研究对象">
@@ -45,6 +49,7 @@
   <dialog id="analyses-dialog"><div class="dialog-heading"><h2>打开分析副本</h2><button data-close="analyses-dialog" aria-label="关闭副本列表">关闭</button></div><div id="analyses-list"></div></dialog>
   <dialog id="research-dialog" class="detail-dialog"><div class="dialog-heading"><h2>研究记录</h2><button data-close="research-dialog">关闭</button></div><label class="visually-hidden" for="research-search">搜索研究记录</label><input id="research-search" type="search" placeholder="名称、字段或 ID"><div id="research-records"></div></dialog>
   <noscript>工作台需要 JavaScript。原始研究 JSON 仍可从本地数据目录读取。</noscript>
+  <script type="module" src="./theme.js"></script>
   <script type="module" src="./app.js"></script>
 </body>
 </html>
