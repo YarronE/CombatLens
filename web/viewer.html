@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>CombatLens 动作工作区</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <a class="skip" href="#workspaces">进入对象窗口</a>
+  <header class="page-header">
+    <div><h1>CombatLens 动作工作区</h1><p id="identity" class="muted">读取本地研究数据</p></div>
+    <div class="header-actions">
+      <div class="mode-switch" role="group" aria-label="查看模式"><button id="mode-original" aria-pressed="true">原始事件</button><button id="mode-analysis" aria-pressed="false">分析副本</button></div>
+      <button id="save-analysis" class="primary" disabled>保存分析 JSON</button>
+      <button id="open-analyses">打开副本</button>
+    </div>
+  </header>
+  <div class="status-strip"><span id="copy-status">原始事件只读</span><span id="notice" role="status" aria-live="polite"></span></div>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="研究对象">
+      <h2>选择对象</h2>
+      <div class="role-filters" role="group" aria-label="对象分类"><button id="role-character" aria-pressed="true">角色</button><button id="role-boss" aria-pressed="false">Boss</button></div>
+      <label class="visually-hidden" for="object-search">搜索对象或技能 ID</label><input id="object-search" type="search" placeholder="搜索对象或技能 ID" autocomplete="off">
+      <p id="object-count" class="muted small"></p>
+      <div id="object-browser"></div>
+      <div class="data-actions"><h3>原始数据与副本</h3><button id="browse-research">研究记录</button><button id="export-analysis" disabled>导出分析 JSON</button><button id="import-analysis">导入分析 JSON</button><button id="save-as" disabled>另存分析副本</button><input id="import-file" type="file" accept=".json,application/json" hidden></div>
+    </aside>
+    <main id="workspaces">
+      <div class="workspace-heading"><h2 id="workspace-title">选择角色或 Boss</h2><p id="data-state" class="muted small">静态证据</p></div>
+      <div id="subject-selection" class="selection-bar"><label>技能招式<select id="action-select" aria-label="技能招式"></select></label><label id="variant-field" hidden>证据版本<select id="variant-select" aria-label="证据版本"></select></label></div>
+      <p id="selection-summary" class="selection-summary muted small"></p>
+      <section id="asset-preview" aria-label="真实模型与动画"></section>
+      <div class="windows"><section id="window-character" class="role-window" data-role="character" aria-label="角色窗口"></section><section id="window-boss" class="role-window" hidden data-role="boss" aria-label="Boss 窗口"></section></div>
+      <section class="inspector" aria-labelledby="inspector-title">
+        <div class="inspector-header"><h2 id="inspector-title">事件详情</h2><span id="inspector-kind" class="muted small"></span></div>
+        <div class="inspector-columns"><div id="original-detail"><p class="muted">选择事件或行为图节点，查看原值与来源。</p></div>
+          <div id="editor-pane" hidden><h3>分析副本</h3><form id="event-editor"><div class="time-inputs"><label>开始<input id="edit-start" type="number" step="any" placeholder="未知"></label><label>结束<input id="edit-end" type="number" step="any" placeholder="时间点留空"></label><label>单位<select id="edit-unit"><option value="">未知</option><option value="seconds">秒</option><option value="frames">帧</option><option value="game_seconds">游戏秒</option><option value="source_units">来源单位</option></select></label></div><label>分析备注<textarea id="edit-note" rows="2"></textarea></label><label>修改理由<textarea id="edit-reason" rows="2" placeholder="说明时间假设或分析依据"></textarea></label><div class="editor-actions"><button type="submit">应用修改</button><button type="button" id="reset-event">恢复原始事件</button></div><p class="muted small">修改只进入分析副本。原始值与来源保持可查。</p></form></div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <dialog id="source-dialog" class="detail-dialog"><div class="dialog-heading"><h2>来源详情</h2><button data-close="source-dialog" aria-label="关闭来源详情">关闭</button></div><div id="source-content"></div></dialog>
+  <dialog id="analyses-dialog"><div class="dialog-heading"><h2>打开分析副本</h2><button data-close="analyses-dialog" aria-label="关闭副本列表">关闭</button></div><div id="analyses-list"></div></dialog>
+  <dialog id="research-dialog" class="detail-dialog"><div class="dialog-heading"><h2>研究记录</h2><button data-close="research-dialog">关闭</button></div><label class="visually-hidden" for="research-search">搜索研究记录</label><input id="research-search" type="search" placeholder="名称、字段或 ID"><div id="research-records"></div></dialog>
+  <noscript>工作台需要 JavaScript。原始研究 JSON 仍可从本地数据目录读取。</noscript>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

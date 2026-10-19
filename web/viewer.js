@@ -1,0 +1,136 @@
+import * as THREE from './vendor/three-r180/build/three.module.js';
+import {GLTFLoader} from './vendor/three-r180/addons/loaders/GLTFLoader.js';
+import {OrbitControls} from './vendor/three-r180/addons/controls/OrbitControls.js';
+import {PlaybackClock,clockMapping,actionToClip,clipToAction,sampleTimes,inspectGLB} from './preview-model.js';
+import {finite,valueText} from './model.js';
+const make=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
+const control=(label,fn)=>{const b=make('button','',label);b.type='button';b.addEventListener('click',fn);return b;};
+export function disposePreviewMaterials(materials){
+  const textures=new Set(),images=new Set();for(const material of materials)Object.values(material).forEach(value=>{if(value?.isTexture)textures.add(value);});
+  textures.forEach(texture=>{const data=texture.source?.data;if(data?.close&&!images.has(data)){images.add(data);data.close();}texture.dispose();});
+  materials.forEach(material=>material.dispose());
+}
+export function applyViewportMaterialPolicy(root,status){
+  if(status!=='gray_preview_no_game_textures')return null;
+  const previous=new Set(),gray=new THREE.MeshStandardMaterial({color:0x8b8a86,roughness:.8,metalness:0,vertexColors:false});
+  root.traverse(node=>{if(!node.isMesh)return;for(const material of Array.isArray(node.material)?node.material:node.material?[node.material]:[])previous.add(material);node.material=gray;});
+  disposePreviewMaterials(previous);
+  return {scope:'viewport_only',basis:'gray_preview_no_game_textures',color:'#8b8a86',roughness:.8,metalness:0,vertexColors:false,source_glb_bytes:'unchanged',game_textures:'not recovered'};
+}
+export function modelLoadErrorMessage(error){
+  const message=typeof error?.message==='string'?error.message:'';
+  if(error?.name==='TypeError'&&/fetch|network|load failed/i.test(message))return '本地模型服务未响应。启动工作台后点击“重新载入模型”。';
+  return message||'模型载入失败。请重试或展开资产与来源核对登记。';
+}
+export class AssetViewer {
+  constructor(host,{openSource=()=>{},onTime=()=>{},onStatus=()=>{}}={}) {
+    this.host=host;this.options={openSource,onTime,onStatus};this.context=null;this.manifest=null;this.asset=null;this.clip=null;this.token=0;this.abort=null;this.renderer=null;this.scene=null;this.model=null;this.mixer=null;this.keys=[];this.lastFrame=null;this.raf=0;this.contextLost=false;
+    this.loadingPromise=null;this.viewportMaterialOverride=null;this.observationBounds=null;this.frameSummary=null;this.followRoot=true;this.rootBone=null;this.followBaseline=null;
+    this.clock=new PlaybackClock(time=>this.applyTime(time));
+    host.classList.add('preview-panel');const header=make('div','preview-heading');header.append(make('h2','','模型与动画'));this.target=make('span','muted small','选择角色或 Boss');header.append(this.target);host.append(header);
+    const body=make('div','preview-body'),left=make('div','preview-main');this.stage=make('div','preview-stage');this.empty=make('p','preview-empty','尚未登记真实模型与骨骼动画。');this.stage.append(this.empty);left.append(this.stage);
+    const controls=make('div','preview-controls');this.play=control('播放',()=>{this.clock.toggle();this.updateControls();});this.previous=control('上一采样',()=>this.step(-1));this.next=control('下一采样',()=>this.step(1));this.zoomIn=control('拉近',()=>this.zoomObservation(.8));this.zoomOut=control('拉远',()=>this.zoomObservation(1.25));this.reset=control('观察复位',()=>this.fitCamera());this.bones=control('显示骨骼',()=>this.toggleBones());this.follow=control('镜头跟随根骨',()=>this.toggleFollow());this.follow.setAttribute('aria-pressed','true');this.retry=control('重新载入模型',()=>this.retryAsset());this.retry.hidden=true;controls.append(this.play,this.previous,this.next,this.zoomIn,this.zoomOut,this.reset,this.bones,this.follow,this.retry);
+    const speedLabel=make('label','preview-speed','观察速度');this.speed=make('select');this.speed.setAttribute('aria-label','动画观察速度');for(const rate of [.25,.5,1,2]){const option=make('option','',rate+'×');option.value=rate;this.speed.append(option);}this.speed.value='1';this.speed.addEventListener('change',()=>{this.clock.speed=Number(this.speed.value);});speedLabel.append(this.speed);controls.append(speedLabel);left.append(controls);
+    this.slider=make('input','preview-scrubber');this.slider.type='range';this.slider.min='0';this.slider.max='0';this.slider.step='any';this.slider.value='0';this.slider.setAttribute('aria-label','动画片段播放位置');this.slider.addEventListener('input',()=>{this.clock.pause();this.clock.seek(Number(this.slider.value));this.updateControls();});left.append(this.slider);
+    this.timeLabel=make('p','preview-time mono','片段时间未知');this.timeLabel.setAttribute('aria-live','off');left.append(this.timeLabel);this.status=make('p','preview-status muted');this.status.setAttribute('role','status');left.append(this.status);
+    const side=make('aside','preview-details');const assetLabel=make('label','','真实资产');this.assetPicker=make('select');this.assetPicker.setAttribute('aria-label','当前对象真实预览资产');assetLabel.append(this.assetPicker);side.append(assetLabel);this.assetPicker.addEventListener('change',()=>{this.loadingPromise=this.loadAsset(this.assetPicker.value);});const clipLabel=make('label','','动画片段');this.clipPicker=make('select');this.clipPicker.setAttribute('aria-label','当前真实动画片段');clipLabel.append(this.clipPicker);side.append(clipLabel);this.clipPicker.addEventListener('change',()=>this.selectClip(this.clipPicker.value));const proof=make('details','asset-proof');proof.append(make('summary','','资产与来源'));this.metadata=make('div','preview-metadata');proof.append(this.metadata);side.append(proof);body.append(left,side);host.append(body);this.disable('尚未登记真实模型与骨骼动画。');
+    this.resizeObserver=new ResizeObserver(()=>this.resize());this.resizeObserver.observe(this.stage);
+    document.addEventListener('visibilitychange',()=>{if(document.hidden){this.clock.pause();this.lastFrame=null;this.updateControls();}});
+  }
+  setManifest(manifest,source) {
+    if(manifest?.schema_version!=='preview-source/1'||!Array.isArray(manifest.assets))throw new Error('预览清单格式不匹配。');
+    this.manifest=manifest;this.source=source;this.contextKey=null;if(this.context)this.setContext(this.context);
+  }
+  setContext(context) {
+    this.context=context;const key=context.objectId+'|'+context.sequenceId;this.target.textContent=(context.role==='boss'?'Boss · ':'角色 · ')+context.objectName;
+    if(key===this.contextKey)return this.loadingPromise||Promise.resolve(Boolean(this.clip));this.contextKey=key;this.clear();this.assetPicker.replaceChildren();this.clipPicker.replaceChildren();
+    if(!this.manifest){this.disable('预览登记尚未读取。');return Promise.resolve(false);}
+    if(this.manifest.game_build!==this.source?.game_build||this.manifest.package_fingerprint!==this.source?.package_fingerprint){this.disable('预览来源版本与当前研究包不匹配。');return Promise.resolve(false);}
+    const candidates=this.manifest.assets.filter(a=>a.object_id===context.objectId&&a.sequence_ids?.includes(context.sequenceId));
+    for(const a of candidates){const option=make('option','',a.name||a.id);option.value=a.id;this.assetPicker.append(option);}
+    if(!candidates.length){this.disable('该招式尚未登记真实 Mesh、Skeleton 与动画。');return Promise.resolve(false);}
+    const ready=candidates.find(a=>a.status==='ready');this.assetPicker.value=(ready||candidates[0]).id;this.assetPicker.disabled=false;return this.loadingPromise=this.loadAsset(this.assetPicker.value);
+  }
+  setMessage(message) {this.status.textContent=message;this.options.onStatus(message);}
+  disable(reason) {this.clock.pause();this.empty.hidden=false;this.empty.textContent=reason;this.setMessage(reason);this.play.disabled=true;this.previous.disabled=true;this.next.disabled=true;this.slider.disabled=true;this.zoomIn.disabled=true;this.zoomOut.disabled=true;this.reset.disabled=true;this.bones.disabled=true;this.follow.disabled=true;this.clipPicker.disabled=true;this.assetPicker.disabled=!this.assetPicker.children.length;this.speed.disabled=true;this.timeLabel.textContent='片段时间未知';}
+  details() {
+    this.metadata.replaceChildren();const values=[['Mesh',this.asset?.source_paths?.mesh],['Skeleton',this.asset?.source_paths?.skeleton],['材质',this.asset?.material_status],['视口材质覆盖',this.viewportMaterialOverride],['可见形态','显示已导出的网格 section；原作运行时显隐与 ABP 未重建'],['片段来源',this.clip?.source_path],['片段时长（秒）',this.clip?.clip_duration_seconds],['原始采样率',this.clip?.source_sample_rate],['原始 play rate',this.clip?.original_play_rate],['Timeline 对应区间',clockMapping(this.clip,this.clock.duration)],['Montage 接段',this.clip?.clock_mapping?.montage_segment_count>1?'只预览所选原始动画段，自动接段与片段混合尚未恢复':'单一已映射动画段'],['GLB 网格计数',this.asset?.geometry],['当前播放基准',clockMapping(this.clip,this.clock.duration)?'序列化 AnimSegment 倍率 '+this.clock.sourceRate+'×':'独立动画片段 1×'],['Root motion',this.asset?.root_motion],['坐标转换',this.asset?.coordinates],['观察镜头',this.followRoot&&this.rootBone?'跟随真实 root 骨骼，仅平移观察镜头，原模型位移保留':'自由观察整片段，原模型位移保留'],['整片段范围估计',this.frameSummary],['GLB SHA256',this.asset?.sha256]];
+    const dl=make('dl','data-list');for(const[label,value]of values){const row=make('div');row.append(make('dt','',label),make('dd','',valueText(value)));dl.append(row);}this.metadata.append(dl);const sources=make('div','source-buttons');[...new Set([...(this.asset?.source_ids||[]),...(this.clip?.source_ids||[])])].forEach(id=>{const b=control('来源 · '+id,()=>this.options.openSource(id));b.title=id;sources.append(b);});this.metadata.append(sources);
+  }
+  clear() {
+    this.retry.hidden=true;this.retry.disabled=true;
+    cancelAnimationFrame(this.raf);this.raf=0;this.loaded=null;this.loadingPromise=null;this.viewportMaterialOverride=null;this.token++;this.abort?.abort();this.abort=null;this.clock.pause();this.clock.duration=0;this.clock.time=0;this.clock.sourceRate=1;this.slider.max='0';this.slider.value='0';this.lastFrame=null;this.clip=null;this.observationBounds=null;this.frameSummary=null;this.rootBone=null;this.followBaseline=null;this.followRoot=true;this.follow.setAttribute('aria-pressed','true');this.asset=null;this.keys=[];
+    if(this.mixer){this.mixer.stopAllAction();if(this.model)this.mixer.uncacheRoot(this.model);this.mixer=null;}
+    if(this.skeletonHelper){this.scene?.remove(this.skeletonHelper);this.skeletonHelper.geometry.dispose();this.skeletonHelper.material.dispose();this.skeletonHelper=null;}
+    this.bones.textContent='显示骨骼';
+    if(this.model){this.scene?.remove(this.model);this.releaseModel(this.model);this.model=null;}
+    this.clipPicker.replaceChildren();this.metadata.replaceChildren();if(this.renderer)this.renderer.domElement.hidden=true;this.disable('读取当前对象资产。');this.options.onTime({objectId:this.context?.objectId,sequenceId:this.context?.sequenceId,clipTime:null,actionTime:null,unit:null});
+  }
+  releaseModel(root) {
+    const geometries=new Set(),materials=new Set(),skeletons=new Set();root.traverse(node=>{if(node.geometry)geometries.add(node.geometry);if(node.skeleton)skeletons.add(node.skeleton);for(const material of Array.isArray(node.material)?node.material:node.material?[node.material]:[])materials.add(material);});
+    disposePreviewMaterials(materials);geometries.forEach(geometry=>geometry.dispose());skeletons.forEach(skeleton=>skeleton.dispose());
+  }
+  async loadAsset(id) {
+    this.clear();const token=this.token,asset=this.manifest?.assets.find(a=>a.id===id);this.asset=asset;this.details();
+    if(!asset||asset.status!=='ready'){this.disable(asset?.reason||'真实资产尚未可用。');return;}
+    if(asset.format!=='glb'||!/^[a-f0-9]{64}$/i.test(asset.sha256||'')||!Number.isSafeInteger(asset.bytes)||asset.bytes<=0){this.disable('登记缺少有效 GLB 长度与 SHA256。');return;}
+    this.abort=new AbortController();this.setMessage('核对并读取真实 GLB。');
+    try {
+      const response=await fetch('/api/preview/assets/'+encodeURIComponent(asset.id),{cache:'no-store',signal:this.abort.signal});if(!response.ok){let message='资产读取失败。';try{const error=await response.json();message=error.message||message;}catch{}throw new Error(message);}
+      const buffer=await response.arrayBuffer();if(token!==this.token)return;if(buffer.byteLength!==asset.bytes)throw new Error('GLB 长度与登记不一致。');
+      const digest=await crypto.subtle.digest('SHA-256',buffer),sha=[...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('');if(sha!==asset.sha256.toLowerCase())throw new Error('GLB SHA256 发生变化。');
+      const json=inspectGLB(buffer);if(asset.joint_count!==undefined&&asset.joint_count!==json.skins[0].joints.length)throw new Error('骨架 joint 数与登记不匹配。');
+      const loader=new GLTFLoader(),gltf=await loader.parseAsync(buffer,'');if(token!==this.token){this.releaseModel(gltf.scene);return;}
+      if(!gltf.animations?.length){this.releaseModel(gltf.scene);throw new Error('GLB 没有可播放的真实动画。');}
+      this.loaded=gltf;this.model=gltf.scene;this.viewportMaterialOverride=applyViewportMaterialPolicy(this.model,asset.material_status);const roots=[];this.model.traverse(node=>{if(node.isBone&&node.name==='root')roots.push(node);});this.rootBone=roots.length===1?roots[0]:null;this.initializeRenderer();this.scene.add(this.model);this.mixer=new THREE.AnimationMixer(this.model);this.mixer.timeScale=1;this.fitCamera();this.renderer.domElement.hidden=false;this.empty.hidden=true;this.assetPicker.disabled=false;this.clipPicker.disabled=false;
+      for(const clip of asset.clips||[]){if(!Number.isInteger(clip.animation_index)||!gltf.animations[clip.animation_index])continue;const option=make('option','',clip.name||clip.id);option.value=clip.id;this.clipPicker.append(option);}
+      if(!this.clipPicker.children.length)throw new Error('真实动画尚未匹配登记片段。');this.selectClip(this.clipPicker.options[0].value);this.runFrame();return Boolean(this.clip);
+    }catch(error){if(token!==this.token||error.name==='AbortError')return false;this.clear();this.asset=asset;this.details();this.disable(modelLoadErrorMessage(error));this.retry.hidden=false;this.retry.disabled=!this.canRetryAsset();return false;}
+  }
+  canRetryAsset(){const asset=this.asset,context=this.context;return Boolean(asset?.status==='ready'&&context&&asset.id===this.assetPicker.value&&asset.object_id===context.objectId&&asset.sequence_ids?.includes(context.sequenceId)&&this.manifest?.game_build===this.source?.game_build&&this.manifest?.package_fingerprint===this.source?.package_fingerprint);}
+  retryAsset(){if(!this.canRetryAsset())return Promise.resolve(false);const id=this.asset.id;this.retry.disabled=true;return this.loadingPromise=this.loadAsset(id);}
+  initializeRenderer() {
+    if(this.renderer&&!this.contextLost)return;
+    if(this.renderer){cancelAnimationFrame(this.raf);this.controls?.dispose();this.renderer.dispose();this.renderer.domElement.remove();this.renderer=null;}
+    const canvas=make('canvas');canvas.setAttribute('aria-label','真实游戏模型与骨骼动画视口');const gl=canvas.getContext('webgl2',{antialias:true});if(!gl)throw new Error('当前浏览器未提供 WebGL2，Timeline 与分析编辑仍可用。');
+    this.renderer=new THREE.WebGLRenderer({canvas,context:gl,antialias:true});this.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));this.renderer.setClearColor(0x080a0c);this.scene=new THREE.Scene();this.camera=new THREE.PerspectiveCamera(45,1,.01,10000);this.controls=new OrbitControls(this.camera,canvas);this.controls.enableDamping=false;
+    this.scene.add(new THREE.HemisphereLight(0xffffff,0x4c4a4a,2));const light=new THREE.DirectionalLight(0xffffff,2.5);light.position.set(3,5,4);this.scene.add(light);this.stage.append(canvas);this.contextLost=false;
+    canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();this.contextLost=true;cancelAnimationFrame(this.raf);this.clock.pause();this.clear();this.disable('WebGL context 丢失。重新选择资产可重试，分析内容已保留。');});this.resize();
+  }
+  resize() {if(!this.renderer)return;const width=Math.max(1,this.stage.clientWidth),height=Math.max(1,this.stage.clientHeight);this.camera.aspect=width/height;this.camera.updateProjectionMatrix();this.renderer.setSize(width,height,false);}
+  fitCamera() {if(!this.model||!this.camera)return;this.model.updateMatrixWorld(true);this.model.traverse(node=>{if(node.skeleton){node.skeleton.update();node.computeBoundingBox();}});const box=this.followRoot&&this.rootBone?new THREE.Box3().setFromObject(this.model):this.observationBounds?.clone()||new THREE.Box3().setFromObject(this.model);if(box.isEmpty())return;const center=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3()),distance=Math.max(size.x,size.y,size.z,.1)*1.7;this.camera.position.copy(center).add(new THREE.Vector3(distance*.8,distance*.35,distance));this.camera.near=Math.max(.001,distance/1000);this.camera.far=Math.max(100,distance*50);this.camera.updateProjectionMatrix();this.controls.target.copy(center);this.controls.update();this.followBaseline=this.followRoot&&this.rootBone?this.rootBone.getWorldPosition(new THREE.Vector3()):null;this.resize();}
+  zoomObservation(factor) {if(!this.model||!this.camera||!this.controls)return;const offset=this.camera.position.clone().sub(this.controls.target),distance=offset.length();if(!finite(distance)||distance<=0)return;const next=Math.max(.02,Math.min(10000,distance*factor));this.camera.position.copy(this.controls.target).add(offset.multiplyScalar(next/distance));this.camera.near=Math.max(.001,next/1000);this.camera.far=Math.max(100,next*50);this.camera.updateProjectionMatrix();this.controls.update();}
+  toggleFollow() {if(!this.rootBone)return;this.followRoot=!this.followRoot;this.follow.setAttribute('aria-pressed',String(this.followRoot));this.followBaseline=null;this.fitCamera();this.applyTime(this.clock.time);this.details();}
+  toggleBones() {if(!this.model)return;if(!this.skeletonHelper){this.skeletonHelper=new THREE.SkeletonHelper(this.model);this.scene.add(this.skeletonHelper);}else this.skeletonHelper.visible=!this.skeletonHelper.visible;this.bones.textContent=this.skeletonHelper.visible?'隐藏骨骼':'显示骨骼';}
+  selectClip(id) {
+    this.clock.pause();this.observationBounds=null;this.frameSummary=null;this.followBaseline=null;const clip=this.asset?.clips?.find(c=>c.id===id),animation=this.loaded?.animations[clip?.animation_index];if(!clip||!animation){this.disable('动画片段引用不匹配。');return;}
+    if(!finite(animation.duration)||animation.duration<0){this.disable('动画采样时长不合法。');return;}
+    if(finite(clip.clip_duration_seconds)&&Math.abs(animation.duration-clip.clip_duration_seconds)>1e-3){this.disable('实际动画时长与登记不一致。');return;}
+    const activeTracks=animation.tracks.filter(t=>t.name&&t.times?.length);if(!activeTracks.length){this.disable('动画没有骨骼采样轨。');return;}
+    for(const track of activeTracks){let prior=-1;for(const time of track.times){if(!finite(time)||time<0||time<=prior){this.disable('动画采样时间不合法。');return;}prior=time;}for(const value of track.values){if(!finite(value)){this.disable('动画采样包含非有限值。');return;}}}
+    const boneNames=new Set();this.model.traverse(node=>{if(node.isBone){boneNames.add(node.name);boneNames.add(node.uuid);}});if(!activeTracks.some(track=>[...boneNames].some(name=>name&&track.name.startsWith(name+'.')))){this.disable('动画没有与当前骨架对应的轨道。');return;}
+    this.clip=clip;this.clipPicker.value=id;this.mixer.stopAllAction();this.action=this.mixer.clipAction(animation);this.action.reset();this.action.setLoop(THREE.LoopOnce,1);this.action.clampWhenFinished=true;this.action.enabled=true;this.action.timeScale=1;this.action.play();
+    const duration=animation.duration;this.keys=sampleTimes(clip.sample_times_seconds?.length?clip.sample_times_seconds:activeTracks.flatMap(t=>Array.from(t.times)),duration);this.clock.configure(duration,clockMapping(clip,duration)?.play_rate||1);this.slider.max=String(duration);this.slider.disabled=duration<=0;this.speed.disabled=false;this.zoomIn.disabled=false;this.zoomOut.disabled=false;this.reset.disabled=false;this.bones.disabled=false;this.follow.disabled=!this.rootBone;this.follow.title=this.rootBone?'仅跟随真实 root Bone 平移观察镜头，模型保留原位移':'该模型没有唯一 root Bone，不能猜测跟随目标';this.play.disabled=duration<=0;this.previous.disabled=!this.keys.length;this.next.disabled=!this.keys.length;this.empty.hidden=true;this.buildObservationBounds();this.details();this.setMessage(clockMapping(clip,duration)?'真实网格与动画段；只在已标区间同步，运行时显隐、ABP、混合与自动接段未重建。':'真实动画片段独立预览，所选 Timeline 时钟对应尚未确认。');this.updateControls();this.fitCamera();
+  }
+  buildObservationBounds() {
+    if(!this.model||!this.mixer||!this.clip)return;
+    const saved=this.clock.time,used=new Set();
+    this.model.updateMatrixWorld(true);this.model.traverse(node=>{if(!node.isSkinnedMesh)return;node.skeleton.update();node.computeBoundingBox();const indices=node.geometry.getAttribute('skinIndex'),weights=node.geometry.getAttribute('skinWeight');if(!indices||!weights)return;for(let i=0;i<indices.count;i++){const ids=[indices.getX(i),indices.getY(i),indices.getZ(i),indices.getW(i)],ws=[weights.getX(i),weights.getY(i),weights.getZ(i),weights.getW(i)];ids.forEach((id,j)=>{if(ws[j]>1e-6&&Number.isInteger(id)&&node.skeleton.bones[id])used.add(node.skeleton.bones[id]);});}});
+    const initial=new THREE.Box3().setFromObject(this.model);if(initial.isEmpty())return;
+    const bounds=initial.clone(),keys=this.keys.length?this.keys:[0],limit=512,selected=keys.length>limit?Array.from({length:limit},(_,i)=>keys[Math.round(i*(keys.length-1)/(limit-1))]):keys;
+    const position=new THREE.Vector3();for(const time of selected){this.action.enabled=true;this.action.paused=false;this.mixer.timeScale=1;this.mixer.setTime(time);this.model.updateMatrixWorld(true);used.forEach(bone=>bounds.expandByPoint(position.setFromMatrixPosition(bone.matrixWorld)));}
+    const size=initial.getSize(new THREE.Vector3()),padding=Math.max(size.x,size.y,size.z)*.12+.02;bounds.expandByScalar(padding);
+    this.observationBounds=bounds;this.frameSummary={basis:'动画蒙皮骨骼采样，观察范围估计',samples:selected.length,total_sample_times:keys.length,weighted_joints:used.size,actor_motion_reconstructed:false};this.applyTime(saved);
+  }
+  applyTime(time) {
+    if(this.mixer&&this.clip){this.mixer.timeScale=1;this.action.enabled=true;this.action.timeScale=1;this.action.paused=false;this.mixer.setTime(time);this.action.paused=true;this.model.updateMatrixWorld(true);if(this.followRoot&&this.rootBone&&this.camera&&this.controls){const position=this.rootBone.getWorldPosition(new THREE.Vector3());if(this.followBaseline){const delta=position.clone().sub(this.followBaseline);this.camera.position.add(delta);this.controls.target.add(delta);}this.followBaseline=position;}}
+    this.slider.value=String(time);this.timeLabel.textContent=this.clip?`${time.toFixed(4)} / ${this.clock.duration.toFixed(4)} 片段秒 · ${clockMapping(this.clip,this.clock.duration)?'AnimSegment 倍率 '+this.clock.sourceRate+'×':'独立片段 1×'} · ${this.followRoot&&this.rootBone?'根骨观察跟随':'自由观察镜头'}`:'片段时间未知';
+    this.options.onTime({objectId:this.context?.objectId,sequenceId:this.context?.sequenceId,clipTime:this.clip?time:null,actionTime:clockMapping(this.clip,this.clock.duration)?clipToAction(time,this.clip):null,unit:clockMapping(this.clip,this.clock.duration)?'seconds':null});
+  }
+  updateControls() {this.play.textContent=this.clock.playing?'暂停':'播放';}
+  step(direction) {this.clock.step(direction,this.keys);this.updateControls();}
+  seekAction(time,unit) {if(!this.clip)return false;if(!clockMapping(this.clip,this.clock.duration)){this.setMessage('所选 Timeline 时钟尚未对应该动画。');return false;}const mapped=actionToClip(time,unit,this.clip);if(mapped===null){this.setMessage('该时间尚不能对应当前动画片段。');return false;}this.clock.pause();this.clock.seek(mapped);this.updateControls();return true;}
+  runFrame() {
+    cancelAnimationFrame(this.raf);const frame=now=>{if(!this.renderer||this.contextLost)return;const delta=this.lastFrame===null?0:Math.max((now-this.lastFrame)/1000,0);this.lastFrame=now;this.clock.tick(delta);this.updateControls();this.controls?.update();this.renderer.render(this.scene,this.camera);this.raf=requestAnimationFrame(frame);};this.lastFrame=null;this.raf=requestAnimationFrame(frame);
+  }
+}

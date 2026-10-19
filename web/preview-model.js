@@ -1,0 +1,60 @@
+import {finite} from './model.js';
+export function clockMapping(clip, duration=clip?.clip_duration_seconds) {
+  const m=clip?.clock_mapping;
+  if(!m||m.status!=='proven'||m.unit!=='seconds'||!Array.isArray(m.source_ids)||!m.source_ids.length)return null;
+  if(!['action_in','action_out','clip_in','clip_out','play_rate'].every(k=>finite(m[k]))||m.play_rate<=0||m.action_in<0||m.clip_in<0||m.action_out<=m.action_in||m.clip_out<=m.clip_in)return null;
+  if(Math.abs((m.action_out-m.action_in)*m.play_rate-(m.clip_out-m.clip_in))>1e-5)return null;
+  if(finite(duration)&&m.clip_out>duration+1e-5)return null;
+  return m;
+}
+export function actionToClip(time,unit,clip) {
+  const m=clockMapping(clip);if(!m||unit!==m.unit||!finite(time)||time<m.action_in-1e-7||time>m.action_out+1e-7)return null;
+  return Math.max(m.clip_in,Math.min(m.clip_out,m.clip_in+(time-m.action_in)*m.play_rate));
+}
+export function clipToAction(time,clip) {
+  const m=clockMapping(clip);if(!m||!finite(time)||time<m.clip_in-1e-7||time>m.clip_out+1e-7)return null;
+  return m.action_in+(time-m.clip_in)/m.play_rate;
+}
+export function sampleTimes(values,duration) {
+  if(!Array.isArray(values))return [];
+  const tolerance=Math.max(1e-6,Math.abs(duration)*2**-23);
+  return [...new Set(values.filter(v=>finite(v)&&v>=0&&v<=duration+tolerance).map(v=>Math.min(v,duration)))].sort((a,b)=>a-b);
+}
+export class PlaybackClock {
+  constructor(onChange=()=>{}) {this.onChange=onChange;this.duration=0;this.time=0;this.speed=1;this.sourceRate=1;this.playing=false;}
+  configure(duration,sourceRate=1) {if(!finite(duration)||duration<0)throw new Error('动画片段时长不合法。');if(!finite(sourceRate)||sourceRate<=0)throw new Error('已确认的原始播放速率不合法。');this.duration=duration;this.sourceRate=sourceRate;this.playing=false;this.seek(0);}
+  seek(time) {if(!finite(time))throw new Error('播放位置必须是有限数值。');this.time=Math.max(0,Math.min(this.duration,time));this.onChange(this.time);return this.time;}
+  tick(delta) {if(!this.playing||!finite(delta)||delta<0)return;this.seek(this.time+delta*this.sourceRate*this.speed);if(this.time>=this.duration)this.playing=false;}
+  toggle() {if(this.duration<=0)return false;if(this.time>=this.duration)this.seek(0);this.playing=!this.playing;return this.playing;}
+  pause() {this.playing=false;}
+  step(direction,keys) {this.pause();const times=sampleTimes(keys,this.duration),epsilon=1e-7;const candidate=direction>0?times.find(t=>t>this.time+epsilon):times.filter(t=>t<this.time-epsilon).at(-1);if(candidate===undefined)return false;this.seek(candidate);return true;}
+}
+export function inspectGLB(buffer) {
+  if(!(buffer instanceof ArrayBuffer)||buffer.byteLength<20)throw new Error('GLB 文件头不完整。');
+  const view=new DataView(buffer);
+  if(view.getUint32(0,true)!==0x46546c67||view.getUint32(4,true)!==2||view.getUint32(8,true)!==buffer.byteLength)throw new Error('GLB 文件头或总长度不合法。');
+  const length=view.getUint32(12,true);if(view.getUint32(16,true)!==0x4e4f534a||length>8*1024*1024||length%4!==0||length>buffer.byteLength-28)throw new Error('GLB JSON chunk 不合法。');
+  const json=JSON.parse(new TextDecoder().decode(new Uint8Array(buffer,20,length)).trim());
+  if(json.asset?.version!=='2.0')throw new Error('仅支持 glTF 2.0。');
+  if((json.buffers||[]).some(b=>b.uri!==undefined)||(json.images||[]).some(i=>i.uri!==undefined))throw new Error('仅支持自包含 GLB，资源 URI 不受允许。');
+  if((json.extensionsRequired||[]).length)throw new Error('本版 GLB 不接入 required 扩展：'+json.extensionsRequired.join(', '));
+  if(json.buffers?.length!==1)throw new Error('GLB 需要一个内嵌 buffer。');
+  const binStart=20+length,binLength=view.getUint32(binStart,true),binType=view.getUint32(binStart+4,true),declared=json.buffers[0].byteLength;
+  if(binType!==0x004e4942||binLength%4!==0||binStart+8+binLength!==buffer.byteLength||!Number.isSafeInteger(declared)||declared<0||binLength-declared<0||binLength-declared>3)throw new Error('GLB BIN 或 buffer 长度不匹配。');
+  if((json.skins||[]).length!==1)throw new Error('本版需要一个真实匹配骨架。');
+  if(!json.animations?.length)throw new Error('GLB 尚无真实动画片段。');
+  const joints=json.skins[0].joints;
+  if(!Array.isArray(joints)||!joints.length||new Set(joints).size!==joints.length||joints.some(j=>!Number.isInteger(j)||j<0||j>=json.nodes?.length))throw new Error('骨骼索引不完整。');
+  if(!json.nodes?.some(n=>n.skin===0&&Number.isInteger(n.mesh)&&n.mesh>=0&&n.mesh<(json.meshes?.length||0)))throw new Error('GLB 尚无绑定骨架的真实网格。');
+  return json;
+}
+
+export class PreviewSeekGate {
+  constructor(){this.intent=0;}
+  cancel(){this.intent++;}
+  async seek(viewer,context,time,unit,isCurrent=()=>true){
+    const intent=++this.intent,ready=await viewer.setContext(context);
+    if(intent!==this.intent||!ready||!isCurrent()||viewer.context?.objectId!==context.objectId||viewer.context?.sequenceId!==context.sequenceId||!viewer.clip)return false;
+    return viewer.seekAction(time,unit);
+  }
+}

@@ -1,0 +1,21 @@
+# Validation
+
+The release uses 39 Python and 22 Node checks for routing, ambiguity, source
+changes, failed preparation, origin/host restrictions, preview geometry and
+clocks, immutable evidence, conflict handling and atomic save/reopen.
+
+Browser validation used registered real local inputs, not synthetic substitute
+models. Checked subject isolation, sampling, exact event location, save revision 1,
+reload/reopen and restoration in revision 2. At 390px and 1440px viewport widths
+the document had no horizontal overflow. Those case inputs, outputs and screenshots
+remain local and are excluded from public Git.
+
+The dependency import closure initially lacked addons/build modules; it was
+completed from the matching MIT r180 distribution and affected checks rerun.
+Preview paths retain the local-directory restriction. The adapter mirrors only
+registered, digest-checked assets into ignored local storage.
+
+Skill frontmatter and unique registry entry were checked manually. The optional
+quick_validate helper could not run because PyYAML was absent. Its local launcher
+and the real request flow were executed successfully. Dynamic client menu loading
+and clean-machine restoration are not claimed.
