@@ -64,4 +64,4 @@ two-axis pinned headers, subject/graph/source navigation, 390px internal scrolli
 and unsaved form retention on resize. A fresh synthetic run also rendered without
 models or game theming. Real inputs and screenshots remain private.
 
-Spec: openspec/changes/fuse-preview-sequencer/ (archive after verification).
+Spec: openspec/changes/archive/2026-10-19-fuse-preview-sequencer/ (verified and archived).
