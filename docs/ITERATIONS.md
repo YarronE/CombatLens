@@ -88,4 +88,4 @@ invalid input preservation, source-context reset, event undo/redo and save/reope
 disables playback/frame controls without supplying a false clock. Case evidence
 and screenshots remain local. Generic generated workspaces use the same renderer.
 
-Spec: openspec/changes/add-playback-range-frames/ (archive after delivery).
+Spec: openspec/changes/archive/2026-10-19-add-playback-range-frames/ (verified and archived).
