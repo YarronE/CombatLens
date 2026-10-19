@@ -7,6 +7,7 @@
   <title>CombatLens 动作工作区</title>
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./instrument.css">
+  <link rel="stylesheet" href="./editor-shell.css">
 </head>
 <body class="workbench">
   <div class="brand-bar"><a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span>CombatLens</a><nav aria-label="工作区域"><a href="/">研究概览</a><a href="viewer.html" aria-current="page">动作工作区</a></nav></div>
@@ -36,15 +37,23 @@
       <div class="workspace-heading"><h2 id="workspace-title">选择角色或 Boss</h2><p id="data-state" class="muted small">静态证据</p></div>
       <div id="subject-selection" class="selection-bar"><label>技能招式<select id="action-select" aria-label="技能招式"></select></label><label id="variant-field" hidden>证据版本<select id="variant-select" aria-label="证据版本"></select></label></div>
       <p id="selection-summary" class="selection-summary muted small"></p>
-      <section id="asset-preview" aria-label="真实模型与动画"></section>
-      <div class="windows"><section id="window-character" class="role-window" data-role="character" aria-label="角色窗口"></section><section id="window-boss" class="role-window" hidden data-role="boss" aria-label="Boss 窗口"></section></div>
+      <section id="action-editor" class="action-editor" aria-label="动作编辑器">
+        <section id="asset-preview" aria-label="真实模型与动画"></section>
+        <div id="editor-divider" class="editor-divider" role="separator" aria-label="调整模型与时间轴高度" aria-orientation="horizontal" aria-valuemin="25" aria-valuemax="75" aria-valuenow="48" tabindex="0"></div>
+        <section class="sequencer-dock" aria-label="Sequencer 时间轴">
+          <div id="editor-transport" class="editor-transport"><strong class="sequencer-title">Sequencer</strong><output id="timeline-time" aria-label="动作时间">动作坐标未对应</output></div>
+          <div class="windows"><section id="window-character" class="role-window" data-role="character" aria-label="角色窗口"></section><section id="window-boss" class="role-window" hidden data-role="boss" aria-label="Boss 窗口"></section></div>
+        </section>
+      </section>
+    </main>
       <section class="inspector" aria-labelledby="inspector-title">
         <div class="inspector-header"><h2 id="inspector-title">事件详情</h2><span id="inspector-kind" class="muted small"></span></div>
+        <details class="asset-inspector" open><summary>预览资产与片段</summary><div id="preview-asset-details"></div></details>
         <div class="inspector-columns"><div id="original-detail"><p class="muted">选择事件或行为图节点，查看原值与来源。</p></div>
           <div id="editor-pane" hidden><h3>分析副本</h3><form id="event-editor"><div class="time-inputs"><label>开始<input id="edit-start" type="number" step="any" placeholder="未知"></label><label>结束<input id="edit-end" type="number" step="any" placeholder="时间点留空"></label><label>单位<select id="edit-unit"><option value="">未知</option><option value="seconds">秒</option><option value="frames">帧</option><option value="game_seconds">游戏秒</option><option value="source_units">来源单位</option></select></label></div><label>分析备注<textarea id="edit-note" rows="2"></textarea></label><label>修改理由<textarea id="edit-reason" rows="2" placeholder="说明时间假设或分析依据"></textarea></label><div class="editor-actions"><button type="submit">应用修改</button><button type="button" id="reset-event">恢复原始事件</button></div><p class="muted small">修改只进入分析副本。原始值与来源保持可查。</p></form></div>
         </div>
+        <div id="event-catalog"></div>
       </section>
-    </main>
   </div>
   <dialog id="source-dialog" class="detail-dialog"><div class="dialog-heading"><h2>来源详情</h2><button data-close="source-dialog" aria-label="关闭来源详情">关闭</button></div><div id="source-content"></div></dialog>
   <dialog id="analyses-dialog"><div class="dialog-heading"><h2>打开分析副本</h2><button data-close="analyses-dialog" aria-label="关闭副本列表">关闭</button></div><div id="analyses-list"></div></dialog>
@@ -52,5 +61,6 @@
   <noscript>工作台需要 JavaScript。原始研究 JSON 仍可从本地数据目录读取。</noscript>
   <script type="module" src="./theme.js"></script>
   <script type="module" src="./app.js"></script>
+  <script type="module" src="./editor-shell.js"></script>
 </body>
 </html>

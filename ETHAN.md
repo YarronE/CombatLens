@@ -7,7 +7,7 @@
 - 个人风格为 `E:/Ethans/00_System/Context/05_Personal-Style.md`。
 - 传递约定为 `E:/Ethans/00_System/跨项目协作/instructions.md`。
 - 当前设计与本机案例记录见知识库 GameReverseWorkbench 项目目录。
-- 当前任务为 `openspec/changes/archive/2026-10-19-add-timeline-manipulation/`，状态见 `docs/STATUS.md`。
+- 当前任务为 `openspec/changes/fuse-preview-sequencer/`，状态见 `docs/STATUS.md`。
 
 ## 创建与同步约定
 
@@ -28,3 +28,8 @@
 2026-10-19 后续实现事件拖拽、区间调整和撤销重做，保持模型动画联动。
 用户允许在有明确收益时克隆REA二次开发；本轮瓶颈在客户端交互，未修改REA。
 通用交互与合成检查进入工程，案例数据和验证截图仍留本地。
+
+
+2026-10-19 模型与Timeline融合为一个编辑窗口，参考UE5 Sequencer的紧凑面板。
+分隔条、共享播放和固定轨道标尺均使用既有时钟，通用布局进入共享渲染器。
+本地案例只用于验收，截图进入知识库项目assets。窗口整合无需修改REA。

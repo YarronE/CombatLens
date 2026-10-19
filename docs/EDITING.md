@@ -34,3 +34,25 @@ proven animation mapping. Undo/redo seeks the restored selected event. Missing
 mapping, unsupported units and times outside a registered segment retain the
 existing explanation; no game-time correspondence is fabricated. Changes are
 analyst hypotheses and do not run game callbacks or write back to the game.
+
+
+## Unified viewport and sequencer
+
+The center dock keeps the model above the event timeline. Drag the horizontal
+separator, or focus it and use Up/Down; Home/End choose the 25%/75% limits. Resizing
+keeps the current renderer and animation time. Layout choices do not enter edit
+history. The shared transport controls the existing preview clock; the adjacent
+readout uses mapped action coordinates. Unproven mapping stays explicitly absent.
+
+The timeline ruler stays at the top while tracks scroll vertically. Native track
+labels stay on the left while time scrolls horizontally. Zoom/fit changes pixel
+scale, preserving event times, units and undo commands. Window resizing adapts the
+axis unless a form draft or pointer gesture is active; the next render applies the
+new width. Track-name clicks do not seek animation.
+
+Asset/clip selectors, source proof and the optional clip sampling slider are in
+the right inspector. Clip seconds remain distinct from the timeline's action unit.
+The collapsed event catalog contains untimed records, additions and hidden-event
+restoration. Its open state survives timeline rerenders. On narrow screens, details
+stack below the dock and the axis scrolls internally. The graph view and source
+dialogs retain their original behavior.

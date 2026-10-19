@@ -42,3 +42,26 @@ coverage is automated against the shared lifecycle. Generic source/analysis
 protection and conflict checks remain. No new game extraction is claimed.
 
 Spec: openspec/changes/archive/2026-10-19-add-timeline-manipulation/ (archived after verification).
+
+
+## 2026-10-19 / Unified viewport and sequencer
+
+Request: follow UE5 Timeline conventions and action-editor practice; fuse model
+animation and timeline into one working window. Implemented a compact three-panel
+shell, shared transport, adjustable separator, native-unit zoom, pinned ruler and
+outliner, and collapsible asset/event details. Existing clock, source mapping,
+history and analysis schema are reused. No external implementation code is copied.
+
+References: Epic Sequencer Toolbar documentation for transport/snapping controls;
+SkillEditorDemo at a4e3e825f75a28c040de3dce6271c70e2411dc62 for typed
+Playables configuration. Reference links and limits are in the design record.
+No claim of reproducing the Unreal runtime or its full Sequencer feature set.
+
+Observed: 47 Python and 45 Node checks passed. Actual browser verified a real model
+and timeline simultaneously at 1440x1000, resized/zoomed drag and both interval
+edges, undo/redo, separate copy save/reopen, mapped playback to segment end,
+two-axis pinned headers, subject/graph/source navigation, 390px internal scrolling
+and unsaved form retention on resize. A fresh synthetic run also rendered without
+models or game theming. Real inputs and screenshots remain private.
+
+Spec: openspec/changes/fuse-preview-sequencer/ (archive after verification).

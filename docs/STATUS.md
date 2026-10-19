@@ -1,13 +1,13 @@
 # Status
 
-Version 0.3.0, 2026-10-19.
+Version 0.4.0, 2026-10-19.
 
 Implemented request routing, reviewed local adapter registration, independent
 research runs, source checks, stage reports, research overview and the generic
 action workspace. Registered models and animations use source-backed mapping;
 analysis copies save separately with revision conflicts and atomic writes.
 
-Validation passed: 47 Python tests, 40 Node tests, and actual browser checks for
+Validation passed: 47 Python tests, 45 Node tests, and actual browser checks for
 model display, sampling, event positioning, copy save/reopen/reset, desktop and
 narrow layout. Test fixtures in Git are synthetic. The installed Skill launcher
 has completed a real local request; a separate app-server also reports the repo Skill enabled; current-window menu refresh remains unverified.
@@ -41,3 +41,12 @@ source values remain read-only. Actual browser verified pointer movement, both
 edges, keyboard history, save/reopen, narrow scrolling and proven animation seek.
 Cancellation paths use shared EventTarget lifecycle tests. REA was not modified;
 this measured bottleneck was client editing, not extraction or decompilation.
+
+Unified editor iteration: one bounded panel places the real viewport above a
+Sequencer-style dock, with shared transport and action-time readout. Adjustable
+25-75% splitter, responsive native-unit zoom, pinned ruler/outliner and a separate
+asset/event inspector preserve the existing renderer and proven clock mapping.
+Actual browser covered both endpoints after zoom, undo/redo, save/reopen,
+playback to segment end, fixed headers after two-axis scrolling, graph/provenance,
+390px overflow and draft preservation. A fresh synthetic run retained the honest
+no-model fallback. No new extraction, runtime reconstruction or REA change.
