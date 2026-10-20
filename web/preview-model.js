@@ -1,19 +1,20 @@
 import {finite} from './model.js';
 export function clockMapping(clip, duration=clip?.clip_duration_seconds) {
   const m=clip?.clock_mapping;
-  if(!m||m.status!=='proven'||m.unit!=='seconds'||!Array.isArray(m.source_ids)||!m.source_ids.length)return null;
+  if(!m||m.status!=='proven'||!['seconds','frames'].includes(m.unit)||!Array.isArray(m.source_ids)||!m.source_ids.length)return null;
   if(!['action_in','action_out','clip_in','clip_out','play_rate'].every(k=>finite(m[k]))||m.play_rate<=0||m.action_in<0||m.clip_in<0||m.action_out<=m.action_in||m.clip_out<=m.clip_in)return null;
-  if(Math.abs((m.action_out-m.action_in)*m.play_rate-(m.clip_out-m.clip_in))>1e-5)return null;
+  const scale=m.unit==='seconds'?(m.seconds_per_unit??1):m.seconds_per_unit;if(!finite(scale)||scale<=0||m.unit==='seconds'&&scale!==1)return null;
+  if(Math.abs((m.action_out-m.action_in)*m.play_rate*scale-(m.clip_out-m.clip_in))>1e-5)return null;
   if(finite(duration)&&m.clip_out>duration+1e-5)return null;
   return m;
 }
 export function actionToClip(time,unit,clip) {
   const m=clockMapping(clip);if(!m||unit!==m.unit||!finite(time)||time<m.action_in-1e-7||time>m.action_out+1e-7)return null;
-  return Math.max(m.clip_in,Math.min(m.clip_out,m.clip_in+(time-m.action_in)*m.play_rate));
+  return Math.max(m.clip_in,Math.min(m.clip_out,m.clip_in+(time-m.action_in)*m.play_rate*(m.seconds_per_unit??1)));
 }
 export function clipToAction(time,clip) {
   const m=clockMapping(clip);if(!m||!finite(time)||time<m.clip_in-1e-7||time>m.clip_out+1e-7)return null;
-  return m.action_in+(time-m.clip_in)/m.play_rate;
+  return m.action_in+(time-m.clip_in)/(m.play_rate*(m.seconds_per_unit??1));
 }
 export function sampleTimes(values,duration) {
   if(!Array.isArray(values))return [];

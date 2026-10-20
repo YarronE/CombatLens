@@ -1,6 +1,6 @@
 # Status
 
-Version 0.8.1, 2026-10-20.
+Version 0.8.2, 2026-10-20.
 
 Implemented request routing, reviewed local adapter registration, independent
 research runs, source checks, stage reports, research overview and the generic
@@ -100,3 +100,5 @@ native event coordinates need proof independently of animation sample times.
 Multiple native skins retain independent joint arrays and inverse bind matrices.
 Each mesh binding is checked against its own skin; shared geometry is checked
 against every binding. No source bind space is merged or retargeted.
+
+Authored-frame coordinate mappings require an explicit seconds_per_unit, matching sequence units and registered evidence. Coordinate scaling is separate from playback rate and animation sample numbering. Native frame counts and source state/clip lengths must be recovered by an adapter; sample rate alone does not prove an event clock. Event seek tolerates float32 source rounding within one ULP. Existing range, loop, step and playback cursor use the declared mapping unit. Runtime callbacks, transition mixing and hit-stop are outside static pose reconstruction.

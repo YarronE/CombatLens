@@ -145,3 +145,9 @@ Source-backed skeletal playback: accept active-scene root/helper channels when a
 Multiple native skins retain independent joint arrays and inverse bind matrices.
 Each mesh binding is checked against its own skin; shared geometry is checked
 against every binding. No source bind space is merged or retargeted.
+
+## 2026-10-20 / Source-authored frame coordinates
+
+Request: bind native event instances to real clip poses without guessing missing clocks, keeping the compact editor and local-only case evidence.
+
+Added explicit authored-frame coordinate scale, separate from playback rate. The server and client reject missing, inconsistent or mismatched unit proofs. Range, loop, cursor and frame seek retain the declared action unit, with registered sample numbering independent of source authoring frames. Float32 rounding does not advance an extra sample. Synthetic validation uses different authoring and sample rates. Static pose positioning does not claim runtime callback execution, transition mixing or hit-stop reconstruction. Real mappings and all case inputs remain local.

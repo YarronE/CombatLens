@@ -335,13 +335,18 @@ class PreviewRepository:
                     mapping = clip.get('clock_mapping')
                     if mapping is not None:
                         names = ('action_in','action_out','clip_in','clip_out','play_rate')
-                        if not isinstance(mapping, dict) or mapping.get('status') != 'proven' or mapping.get('unit') != 'seconds' or any(not finite(mapping.get(name)) for name in names):
+                        if not isinstance(mapping, dict) or mapping.get('status') != 'proven' or mapping.get('unit') not in {'seconds','frames'} or any(not finite(mapping.get(name)) for name in names):
                             raise ValueError('Invalid preview clock proof.')
-                        if mapping['action_in'] < 0 or mapping['clip_in'] < 0 or mapping['action_out'] <= mapping['action_in'] or mapping['clip_out'] <= mapping['clip_in'] or mapping['play_rate'] <= 0 or mapping['clip_out'] > duration + TIME_TOLERANCE or not math.isclose(mapping['clip_out'] - mapping['clip_in'], (mapping['action_out'] - mapping['action_in']) * mapping['play_rate'], rel_tol=1e-9, abs_tol=TIME_TOLERANCE):
+                        scale = mapping.get('seconds_per_unit', 1 if mapping['unit']=='seconds' else None)
+                        if not finite(scale) or scale <= 0 or mapping['unit']=='seconds' and scale != 1:
+                            raise ValueError('Authored frame mapping requires an explicit coordinate scale.')
+                        if mapping['action_in'] < 0 or mapping['clip_in'] < 0 or mapping['action_out'] <= mapping['action_in'] or mapping['clip_out'] <= mapping['clip_in'] or mapping['play_rate'] <= 0 or mapping['clip_out'] > duration + TIME_TOLERANCE or not math.isclose(mapping['clip_out'] - mapping['clip_in'], (mapping['action_out'] - mapping['action_in']) * mapping['play_rate'] * scale, rel_tol=1e-9, abs_tol=TIME_TOLERANCE):
                             raise ValueError('Inconsistent or out-of-range preview clock mapping.')
                         for seqid in asset['sequence_ids']:
                             sequence = registered[oid][seqid]
-                            if sequence.get('unit') == 'seconds' and finite(sequence.get('duration')) and mapping['action_out'] > sequence['duration'] + TIME_TOLERANCE:
+                            if mapping['unit']=='frames' and sequence.get('unit')!='frames':
+                                raise ValueError('Authored frame mapping requires a matching sequence coordinate.')
+                            if sequence.get('unit') == mapping['unit'] and finite(sequence.get('duration')) and mapping['action_out'] > sequence['duration'] + TIME_TOLERANCE:
                                 raise ValueError('Preview clock mapping exceeds its authored action duration.')
                         source_ids(mapping.get('source_ids'))
         except (ValueError, TypeError, OverflowError) as error:

@@ -146,6 +146,20 @@ class PreviewTests(unittest.TestCase):
             self.preview.manifest()
         self.assertEqual(caught.exception.status,503)
 
+    def test_authored_frame_mapping_requires_matching_units_and_scale(self):
+        seq=self.originals['objects'][0]['sequences'][0]
+        seq.update(unit='frames',duration=24)
+        (self.research/'timelines.json').write_text(json.dumps(self.originals),encoding='utf-8')
+        mapping=self.manifest['assets'][0]['clips'][0]['clock_mapping']
+        mapping.update(unit='frames',action_out=24,seconds_per_unit=1/24)
+        self.write_manifest()
+        self.assertEqual(self.preview.manifest()['assets'][0]['clips'][0]['clock_mapping']['play_rate'],1)
+        for scale in [None,0,-1,1/30,True]:
+            mapping['seconds_per_unit']=scale;self.write_manifest()
+            with self.assertRaises(WorkbenchError):self.preview.manifest()
+        mapping['seconds_per_unit']=1/24;mapping['action_out']=48;self.write_manifest()
+        with self.assertRaises(WorkbenchError):self.preview.manifest()
+
     def test_binary_animation_keys_and_accessor_ranges_are_validated(self):
         invalid_vertex_joint=bytearray(fixture())
         bin_start=28+struct.unpack_from('<I',invalid_vertex_joint,12)[0]
