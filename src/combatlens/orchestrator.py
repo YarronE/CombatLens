@@ -42,7 +42,7 @@ def validate_run(root,out):
     if len(ids)!=len(set(ids)):raise ValueError('duplicate_object_id')
     return {'fingerprint':fingerprint,'sources':len(package['sources']),'objects':len(ids),'sequences':sum(len(obj.get('sequences',[])) for obj in timeline['objects']),'events':sum(len(seq.get('events',[])) for obj in timeline['objects'] for seq in obj.get('sequences',[]))}
 
-def analyze(prompt,root=ROOT,adapter_id=None):
+def analyze(prompt,root=ROOT,adapter_id=None,activate=True):
     adapter=route(prompt,configured(root)['adapters'],adapter_id)
     module_path=Path(adapter['entrypoint']).resolve()
     if not module_path.is_file() or module_path.suffix!='.py':raise ValueError('adapter_entrypoint_missing')
@@ -61,7 +61,7 @@ def analyze(prompt,root=ROOT,adapter_id=None):
         summary.extend('- '+str(value) for value in job.get('coverage',[]));summary+=['','## Gaps',''];summary.extend('- '+str(value) for value in job.get('gaps',[]))
         (out/'analysis.md').write_text('\n'.join(summary)+'\n',encoding='utf-8')
         # A partial run never replaces this pointer.
-        save_json(root/'local/research/active-source.json',{'schema_version':'research-pointer/1','relative_directory':run_id})
+        if activate:save_json(root/'local/research/active-source.json',{'schema_version':'research-pointer/1','relative_directory':run_id})
         return job|{'research_dir':str(out),'markdown':str(out/'analysis.md')}
     except BaseException as error:
         job['state']='cancelled' if isinstance(error,KeyboardInterrupt) else 'failed';job['error']=type(error).__name__+': '+str(error);save_json(out/'run-report.json',job)

@@ -24,6 +24,14 @@ class RequestTests(unittest.TestCase):
    with self.assertRaisesRegex(ValueError,'synthetic failure'):analyze('game',root)
    self.assertEqual(pointer.read_bytes(),before)
    reports=[json.loads(p.read_text(encoding="utf-8")) for p in (root/'local/research').glob('*/run-report.json')];self.assertTrue(any(x['state']=='failed' for x in reports))
+ def test_batch_can_prepare_a_valid_run_without_publishing_it(self):
+  with tempfile.TemporaryDirectory() as folder:
+   root=Path(folder);initial=demo(root);original=Path(initial['research_dir']);pointer=root/'local/research/active-source.json';before=pointer.read_bytes()
+   adapter=root/'prepared.py';adapter.write_text("import shutil\nfrom pathlib import Path\ndef prepare(request,out):\n    source=Path("+repr(str(original))+")\n    for name in ['research-package.json','timelines.json','source-root.json']:shutil.copyfile(source/name,out/name)\n    return {'title':'Synthetic batch'}\n")
+   save_json(root/'local/config.json',{'schema':'combatlens-config/1','adapters':[{'id':'prepared','aliases':['game'],'entrypoint':str(adapter)}]})
+   result=analyze('game',root,activate=False);self.assertEqual(result['state'],'ready');self.assertEqual(pointer.read_bytes(),before)
+   published=analyze('game',root);self.assertEqual(json.loads(pointer.read_text())['relative_directory'],published['id'])
+
  def test_changed_source_fails_before_activation(self):
   with tempfile.TemporaryDirectory() as folder:
    root=Path(folder);result=demo(root);out=Path(result['research_dir']);(out/'synthetic-source.json').write_text('{}')
