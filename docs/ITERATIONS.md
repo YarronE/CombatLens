@@ -139,3 +139,5 @@ No game inputs, names, findings, adapters or screenshots enter this public chang
 
 Spec: openspec/changes/archive/2026-10-20-add-local-bundles-static-preview/ (validation complete;
 delivery and archival tracked in Tasks).
+
+Source-backed skeletal playback: accept active-scene root/helper channels when a clip drives a registered joint or its real ancestor. Unrelated-only and unreachable channels remain rejected. Adapter extraction must preserve authored endpoints and keep independent clip time separate from unproven native event clocks. Validation: 78 Python and 73 Node checks passed; native case assets remain local.

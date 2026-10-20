@@ -61,3 +61,11 @@ export class PreviewSeekGate {
     return frame?viewer.seekEventFrame(time,unit):viewer.seekAction(time,unit);
   }
 }
+
+
+export function animationDrivesRig(root,tracks) {
+  if(!root||!Array.isArray(tracks))return false;
+  const names=new Set(),inside=new Set();root.traverse(node=>inside.add(node));
+  root.traverse(node=>{if(!node.isBone)return;for(let current=node;current&&inside.has(current);current=current.parent){if(current.name)names.add(current.name);if(current.uuid)names.add(current.uuid);}});
+  return tracks.some(track=>track.name&&track.times?.length&&[...names].some(name=>track.name.startsWith(name+'.')));
+}

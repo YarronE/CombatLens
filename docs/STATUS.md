@@ -1,6 +1,6 @@
 # Status
 
-Version 0.7.0, 2026-10-20.
+Version 0.8.1, 2026-10-20.
 
 Implemented request routing, reviewed local adapter registration, independent
 research runs, source checks, stage reports, research overview and the generic
@@ -90,3 +90,9 @@ original evidence, static model/orbit/reset, native data links and AI navigation
 copy editing/history/save/reopen and narrow layout. No new complete unpacking or
 game-runtime observation is claimed. Case-specific integration is delivered only
 to the authorized private case project; all assets/datasets remain local.
+
+Skeletal compatibility iteration: active scene root and attachment channels are
+accepted only when each clip drives the registered rig or its real ancestors.
+Unreachable nodes, unrelated-only animation and invalid binary/source proofs
+remain rejected. 78 Python and 73 Node checks pass. Case extraction stays local;
+native event coordinates need proof independently of animation sample times.

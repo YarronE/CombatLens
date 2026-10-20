@@ -3,7 +3,7 @@ import {registeredFrames,framePosition,frameTime,eventFrameTarget} from './frame
 import * as THREE from './vendor/three-r180/build/three.module.js';
 import {GLTFLoader} from './vendor/three-r180/addons/loaders/GLTFLoader.js';
 import {OrbitControls} from './vendor/three-r180/addons/controls/OrbitControls.js';
-import {PlaybackClock,clockMapping,actionToClip,clipToAction,sampleTimes,inspectGLB} from './preview-model.js';
+import {PlaybackClock,clockMapping,actionToClip,clipToAction,sampleTimes,inspectGLB,animationDrivesRig} from './preview-model.js';
 import {finite,valueText} from './model.js';
 const make=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
 const control=(label,fn)=>{const b=make('button','',label);b.type='button';b.addEventListener('click',fn);return b;};
@@ -119,7 +119,7 @@ export class AssetViewer {
     if(finite(clip.clip_duration_seconds)&&Math.abs(animation.duration-clip.clip_duration_seconds)>1e-3){this.disable('实际动画时长与登记不一致。');return;}
     const activeTracks=animation.tracks.filter(t=>t.name&&t.times?.length);if(!activeTracks.length){this.disable('动画没有骨骼采样轨。');return;}
     for(const track of activeTracks){let prior=-1;for(const time of track.times){if(!finite(time)||time<0||time<=prior){this.disable('动画采样时间不合法。');return;}prior=time;}for(const value of track.values){if(!finite(value)){this.disable('动画采样包含非有限值。');return;}}}
-    const boneNames=new Set();this.model.traverse(node=>{if(node.isBone){boneNames.add(node.name);boneNames.add(node.uuid);}});if(!activeTracks.some(track=>[...boneNames].some(name=>name&&track.name.startsWith(name+'.')))){this.disable('动画没有与当前骨架对应的轨道。');return;}
+    if(!animationDrivesRig(this.model,activeTracks)){this.disable('动画没有与当前骨架对应的轨道。');return;}
     this.clip=clip;this.clipPicker.value=id;this.mixer.stopAllAction();this.action=this.mixer.clipAction(animation);this.action.reset();this.action.setLoop(THREE.LoopOnce,1);this.action.clampWhenFinished=true;this.action.enabled=true;this.action.timeScale=1;this.action.play();
     const duration=animation.duration;this.keys=sampleTimes(clip.sample_times_seconds?.length?clip.sample_times_seconds:activeTracks.flatMap(t=>Array.from(t.times)),duration);this.frames=registeredFrames(clip,duration);this.clock.configure(duration,clockMapping(clip,duration)?.play_rate||1);const mapping=clockMapping(clip,duration);if(mapping){this.clock.setRange(mapping.clip_in,Math.min(mapping.clip_out,duration));this.clock.seek(mapping.clip_in);}this.slider.max=String(duration);this.slider.disabled=duration<=0;this.speed.disabled=false;this.zoomIn.disabled=false;this.zoomOut.disabled=false;this.reset.disabled=false;this.bones.disabled=false;this.follow.disabled=!this.rootBone;this.follow.title=this.rootBone?'仅跟随真实 root Bone 平移观察镜头，模型保留原位移':'该模型没有唯一 root Bone，不能猜测跟随目标';this.play.disabled=duration<=0;this.previous.disabled=!this.frames.length;this.next.disabled=!this.frames.length;this.empty.hidden=true;this.buildObservationBounds();this.details();this.setMessage(clockMapping(clip,duration)?'':'动画尚未对应Timeline');this.refreshPlaybackControls();this.updateControls();this.fitCamera();this.options.onPlayback();
   }

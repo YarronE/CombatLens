@@ -153,3 +153,10 @@ The catalog supports up to 500 entries and 512 KiB. `freeze` captures the select
 not bundle the entire collection. No game data belongs in the repository.
 
 Batch integrations may call `analyze(..., activate=False)` to validate individual runs without changing the current entry. Publish the chosen research pointer only after every required run and catalog is ready. The default single-run call still activates immediately after its validation.
+
+Rig animation may include source root and attachment transforms in the active scene.
+Each clip must drive a registered joint or one of its real hierarchy ancestors;
+unrelated helper-only clips, unreachable targets and invalid key data remain rejected.
+Decoded padding past an authored clip endpoint must not extend that clip. Native
+state/event clocks need independent proof; use separate source-backed clip sequences
+when the native event clock or controller binding is unresolved.

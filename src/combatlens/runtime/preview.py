@@ -227,21 +227,28 @@ def inspect_glb(handle, size, kind="skinned_animation"):
                 if any(any(value < 0 or value > maximum for value in row) or sum(row) <= 0 for row in rows(index)):
                     raise ValueError('Actual skin weights are invalid or empty.')
     animations = objects(doc.get('animations',[]) if static else doc.get('animations'), 'animations', not static)
+    rig_nodes=set(joint_set) if not static else set()
+    for joint in tuple(rig_nodes):
+        current=parents.get(joint)
+        while current is not None:
+            rig_nodes.add(current);current=parents.get(current)
     time_bounds = {}
     animation_bounds = []
     for animation in animations:
         samplers = objects(animation.get('samplers'), 'animation samplers', True)
         channels = objects(animation.get('channels'), 'animation channels', True)
         used = set()
+        drives_rig = False
         first, last = math.inf, -math.inf
         for channel in channels:
             sampler_index = integer(channel.get('sampler'))
             target = channel.get('target')
-            if sampler_index >= len(samplers) or not isinstance(target, dict) or type(target.get('node')) is not int or target['node'] not in joint_set or target.get('path') not in ('translation', 'rotation', 'scale'):
-                raise ValueError('Animation channel must target an existing joint transform.')
+            if sampler_index >= len(samplers) or not isinstance(target, dict) or type(target.get('node')) is not int or target['node'] not in reachable or target.get('path') not in ('translation', 'rotation', 'scale'):
+                raise ValueError('Animation channel must target an existing active-scene transform.')
             if 'matrix' in nodes[target['node']] or (target['node'], target['path']) in used:
                 raise ValueError('Animated joint is a matrix or has duplicate channels.')
             used.add((target['node'], target['path']))
+            drives_rig = drives_rig or target['node'] in rig_nodes
             sampler = samplers[sampler_index]
             input_index, input_accessor = accessor_at(sampler.get('input'), 'SCALAR', (5126,))
             if input_accessor.get('normalized'):
@@ -265,6 +272,8 @@ def inspect_glb(handle, size, kind="skinned_animation"):
             _, output = accessor_at(sampler.get('output'), 'VEC4' if target['path'] == 'rotation' else 'VEC3', (5126,))
             if output.get('normalized') or output['count'] != input_accessor['count'] * (3 if interpolation == 'CUBICSPLINE' else 1):
                 raise ValueError('Animation output count differs from actual time keys.')
+        if not drives_rig:
+            raise ValueError('Animation must drive the registered rig or a rig ancestor.')
         if not math.isfinite(last) or last <= 0:
             raise ValueError('Animation has no positive actual clip duration.')
         animation_bounds.append({'first': first, 'last': last})

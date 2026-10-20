@@ -227,3 +227,33 @@ class StaticOnlyTests(unittest.TestCase):
     def test_static_empty_invalid_geometry_is_rejected(self):
         for mutate in [lambda d:d['meshes'][0].update(primitives=[]),lambda d:d['accessors'][0].update(count=1000),lambda d:d['nodes'][0].update(children=[0]),lambda d:d['scenes'][0].update(nodes=[])]:
             self.static(static_fixture(mutate));self.assertEqual(self.preview.response()['assets'][0]['status'],'unavailable')
+
+
+class RigHierarchyTests(unittest.TestCase):
+    def inspect(self,mutate):
+        import io
+        payload=fixture(mutate=mutate)
+        return preview_module.inspect_glb(io.BytesIO(payload),len(payload))
+
+    def test_real_rig_root_ancestor_is_allowed(self):
+        def mutate(d):
+            d['nodes'].append({'name':'source-root','children':[1]})
+            d['scenes'][0]['nodes']=[0,2]
+            d['animations'][0]['channels'][0]['target']['node']=2
+        self.assertEqual(self.inspect(mutate)['_workbench_animation_bounds'][0]['last'],1)
+
+    def test_joint_with_additional_reachable_helper_is_allowed(self):
+        def mutate(d):
+            d['nodes'].append({'name':'attachment'})
+            d['scenes'][0]['nodes'].append(2)
+            d['animations'][0]['channels'].append({'sampler':0,'target':{'node':2,'path':'translation'}})
+        self.assertEqual(len(self.inspect(mutate)['animations'][0]['channels']),2)
+
+    def test_helper_only_and_out_of_scene_channels_are_rejected(self):
+        for reachable in [False,True]:
+            def mutate(d):
+                d['nodes'].append({'name':'unrelated'})
+                if reachable:d['scenes'][0]['nodes'].append(2)
+                else:d['animations'][0]['channels'].append({'sampler':0,'target':{'node':1,'path':'scale'}})
+                d['animations'][0]['channels'][0]['target']['node']=2
+            with self.subTest(reachable=reachable),self.assertRaises(ValueError):self.inspect(mutate)
