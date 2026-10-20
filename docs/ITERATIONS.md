@@ -137,5 +137,5 @@ were independently re-read; results are reuse/verification, not new extraction.
 No FPS, complete assembly, skeletal binding or runtime callback was fabricated.
 No game inputs, names, findings, adapters or screenshots enter this public change.
 
-Spec: openspec/changes/add-local-bundles-static-preview/ (validation complete;
+Spec: openspec/changes/archive/2026-10-20-add-local-bundles-static-preview/ (validation complete;
 delivery and archival tracked in Tasks).
