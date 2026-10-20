@@ -1,8 +1,9 @@
+import {apiURL} from './workspace.js';
 // Shared renderer: local visual inputs never become executable markup or CSS URLs.
 export async function applyPresentation() {
   const status=document.getElementById('theme-status');
   try {
-    const response=await fetch('/api/presentation');
+    const response=await fetch(apiURL('/api/presentation'));
     if(!response.ok)throw new Error('主题不可用');
     const theme=await response.json();
     for(const [key,value] of Object.entries(theme.palette||{}))
@@ -11,7 +12,7 @@ export async function applyPresentation() {
     for(const node of document.querySelectorAll('[data-theme-subtitle]'))node.textContent=theme.subtitle;
     if(theme.hero?.url==='/api/presentation/hero'){
       for(const node of document.querySelectorAll('[data-theme-image]')){
-        node.src=theme.hero.url;node.alt=theme.hero.alt||'';
+        node.src=apiURL(theme.hero.url);node.alt=theme.hero.alt||'';
         node.addEventListener('load',()=>{node.hidden=false;document.body.classList.add('has-artwork')},{once:true});
         node.addEventListener('error',()=>{node.hidden=true;if(status)status.textContent='主视觉未载入，研究内容仍可查看。'},{once:true});
       }

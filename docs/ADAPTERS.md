@@ -134,3 +134,20 @@ code in ignored local directories or an explicitly authorized private game repo;
 public CombatLens Git continues to contain generic implementation and synthetic
 checks only. Native parsers should state which original bytes were re-read on
 each generation rather than relabel an old validation report as a fresh check.
+
+## Workspace collection
+
+For large prepared cases, generate separate standard runs under `local/research/`.
+In the selected/default run write `workspaces.json`:
+
+```json
+{"schema_version":"workspace-collection/1","label":"研究对象","default_id":"sample-one","entries":[{"id":"sample-one","title":"Synthetic object","directory":"synthetic-run-one","fingerprint":"<exact research-package.json SHA256>"}]}
+```
+
+Directories are relative to this project's `local/research`, with no absolute paths or traversal.
+IDs must be unique ASCII slugs (up to 80 characters). The server rejects stale package hashes.
+Use `/workspaces/sample-one/viewer.html` or its overview URL. All evidence, previews and saves
+use this URL scope, so separate tabs do not share a mutable selected object. The original
+Host/Origin and source validation rules apply. The default run remains available at legacy URLs.
+The catalog supports up to 500 entries and 512 KiB. `freeze` captures the selected run; it does
+not bundle the entire collection. No game data belongs in the repository.

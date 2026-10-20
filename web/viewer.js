@@ -1,3 +1,4 @@
+import {apiURL} from './workspace.js';
 import {registeredFrames,framePosition,frameTime,eventFrameTarget} from './frame-model.js';
 import * as THREE from './vendor/three-r180/build/three.module.js';
 import {GLTFLoader} from './vendor/three-r180/addons/loaders/GLTFLoader.js';
@@ -81,7 +82,7 @@ export class AssetViewer {
     if(asset.format!=='glb'||!/^[a-f0-9]{64}$/i.test(asset.sha256||'')||!Number.isSafeInteger(asset.bytes)||asset.bytes<=0){this.disable('登记缺少有效 GLB 长度与 SHA256。');return;}
     this.abort=new AbortController();this.setMessage('核对并读取真实 GLB。');
     try {
-      const response=await fetch('/api/preview/assets/'+encodeURIComponent(asset.id),{cache:'no-store',signal:this.abort.signal});if(!response.ok){let message='资产读取失败。';try{const error=await response.json();message=error.message||message;}catch{}throw new Error(message);}
+      const response=await fetch(apiURL('/api/preview/assets/'+encodeURIComponent(asset.id)),{cache:'no-store',signal:this.abort.signal});if(!response.ok){let message='资产读取失败。';try{const error=await response.json();message=error.message||message;}catch{}throw new Error(message);}
       const buffer=await response.arrayBuffer();if(token!==this.token)return;if(buffer.byteLength!==asset.bytes)throw new Error('GLB 长度与登记不一致。');
       const digest=await crypto.subtle.digest('SHA-256',buffer),sha=[...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('');if(sha!==asset.sha256.toLowerCase())throw new Error('GLB SHA256 发生变化。');
       const json=inspectGLB(buffer,{kind:asset.kind||'skinned_animation'});if(asset.joint_count!==undefined&&asset.joint_count!==(json.skins?.[0]?.joints.length||0))throw new Error('骨架 joint 数与登记不匹配。');

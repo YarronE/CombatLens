@@ -9,12 +9,7 @@ from .runtime.server import WorkbenchServer,Handler
 from .runtime.repository import Repository
 
 class LensHandler(Handler):
-    def do_GET(self):
-        if self.path.split('?')[0]=='/api/run':
-            try:
-                self.authorize();self.reply(200,load_json(self.server.repository.research_dir/'run-report.json'))
-            except Exception as error:self.reply(503,{'error':'run_unavailable','message':str(error)})
-        else:super().do_GET()
+    pass
 
 def active(root=ROOT):
     config=Config(root);return config.paths()[1]

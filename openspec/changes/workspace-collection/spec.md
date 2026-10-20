@@ -1,0 +1,3 @@
+# Requirements
+
+An optional workspaces.json in the active research directory registers unique safe IDs, titles, relative research directories and exact package fingerprints. Every directory must remain within repo/local/research. Unknown IDs, traversal, stale fingerprints and oversized or malformed catalogs fail closed. Prefix every API and asset request consistently; all existing Host/Origin checks, source hashes, analysis fingerprints and per-workspace preview identities still apply. Keep legacy URLs unchanged when no catalog exists. Selecting a workspace navigates to its own URL, keeping tabs and analysis copies isolated.

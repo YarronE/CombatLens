@@ -102,3 +102,7 @@ python run.py freeze /path/to/game-project/local/snapshots/version --research /p
 静态模型无需先有骨骼动画。适配器可明确登记 static_mesh，工作台显示真实几何，
 并禁用缺少依据的播放与逐帧。原生配置状态不自动当成独立招式，未确认的时钟
 继续使用来源坐标。副本列表只显示当前Build和研究指纹，其他案例文件保留原位。
+
+## 多对象研究目录
+
+同一项目可登记多个独立研究包，通过页面顶部的选择框切换。每个对象只加载自己的来源、Timeline与AI，分析副本按研究包指纹隔离。已有单研究包链接保持可用。目录格式见 [适配器说明](docs/ADAPTERS.md#workspace-collection)。

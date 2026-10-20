@@ -15,6 +15,7 @@ from .validation import WorkbenchError
 from .preview import PreviewRepository
 from .presentation import resolve as resolve_presentation
 from .event_guide import resolve as resolve_event_guide
+from .collection import Collection
 
 
 class WorkbenchServer(ThreadingHTTPServer):
@@ -26,6 +27,7 @@ class WorkbenchServer(ThreadingHTTPServer):
             raise ValueError("The workbench only binds 127.0.0.1.")
         self.repository = repository
         self.preview = PreviewRepository(repository)
+        self.collection = Collection(repository)
         super().__init__(address, Handler)
 
 
@@ -62,12 +64,31 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
+    def route_path(self):
+        path = unquote(urlsplit(self.path).path)
+        if path.startswith("/workspaces/"):
+            parts=path.split("/",3)
+            if len(parts)<4:raise WorkbenchError("Workspace route requires a path.",status=404,code="not_found")
+            return "/"+parts[3]
+        return path
+
+    def context(self):
+        path=unquote(urlsplit(self.path).path)
+        if path.startswith("/workspaces/"):
+            return self.server.collection.resolve(path.split("/",3)[2])
+        return self.server.repository,self.server.preview
+
     def do_GET(self):
         try:
             self.authorize()
-            path = unquote(urlsplit(self.path).path)
-            repository = self.server.repository
-            if path == "/api/health":
+            path = self.route_path()
+            repository, preview = self.context()
+            if path == "/api/workspaces":
+                self.reply(200, self.server.collection.response())
+            elif path == "/api/run":
+                from .repository import read_json
+                self.reply(200, read_json(repository.research_dir / "run-report.json")[0])
+            elif path == "/api/health":
                 workspace = repository.root.resolve().as_posix().lower().encode("utf-8")
                 self.reply(200, {"service": "combatlens", "api_version": 1,
                                  "pid": os.getpid(), "port": self.server.server_port,
@@ -96,9 +117,9 @@ class Handler(BaseHTTPRequestHandler):
             elif path == "/api/timelines":
                 self.reply(200, repository.timelines_response())
             elif path == "/api/preview":
-                self.reply(200, self.server.preview.response())
+                self.reply(200, preview.response())
             elif path.startswith("/api/preview/assets/"):
-                self.preview_asset(path[len("/api/preview/assets/"):])
+                self.preview_asset(path[len("/api/preview/assets/"):], preview)
             elif path == "/api/analyses":
                 self.reply(200, repository.analyses())
             elif path.startswith("/api/analyses/"):
@@ -117,8 +138,8 @@ class Handler(BaseHTTPRequestHandler):
         except (ValueError, OSError, RecursionError) as error:
             self.reply(500, {"error": "read_failed", "message": str(error)})
 
-    def preview_asset(self, asset_id):
-        handle, size, sha = self.server.preview.binary(asset_id)
+    def preview_asset(self, asset_id, preview=None):
+        handle, size, sha = (preview or self.server.preview).binary(asset_id)
         with handle:
             self.send_response(200)
             self.send_header("Content-Type", "model/gltf-binary")
@@ -157,7 +178,8 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         try:
             self.authorize(writing=True)
-            if urlsplit(self.path).path != "/api/analyses":
+            repository, _ = self.context()
+            if self.route_path() != "/api/analyses":
                 raise WorkbenchError("Unknown save route.", status=404, code="not_found")
             if self.headers.get("Content-Type", "").split(";", 1)[0].strip().lower() != "application/json":
                 raise WorkbenchError("Save requests require application/json.", status=415, code="content_type_rejected")
@@ -167,14 +189,14 @@ class Handler(BaseHTTPRequestHandler):
                 length = int(self.headers.get("Content-Length", "-1"))
             except ValueError as error:
                 raise WorkbenchError("Invalid Content-Length.") from error
-            if length < 0 or length > self.server.repository.config.max_request_bytes:
+            if length < 0 or length > repository.config.max_request_bytes:
                 raise WorkbenchError("Save payload exceeds the allowed size.", status=413, code="payload_too_large")
             raw = self.rfile.read(length)
             try:
                 body = json.loads(raw.decode("utf-8"), parse_constant=lambda name: (_ for _ in ()).throw(ValueError(name)))
             except (UnicodeError, ValueError, RecursionError) as error:
                 raise WorkbenchError("Invalid JSON payload.") from error
-            self.reply(200, self.server.repository.save(body))
+            self.reply(200, repository.save(body))
         except WorkbenchError as error:
             self.reply(error.status, error.payload())
         except (OSError, ValueError, RecursionError) as error:
