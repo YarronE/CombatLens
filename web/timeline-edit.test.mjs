@@ -29,3 +29,9 @@ test('cancel, lost capture and window blur each roll back exactly once',()=>{for
 
 test('overlapping intervals occupy distinct lanes and touching intervals share a lane',()=>{const result=timelineLanes([{id:'a',track:'same',start:0,end:0.7},{id:'b',track:'same',start:0.5,end:1},{id:'c',track:'same',start:1,end:2}]);assert.equal(result.rows,2);assert.notEqual(result.tracks[0].lanes.get('a'),result.tracks[0].lanes.get('b'));assert.equal(result.tracks[0].lanes.get('a'),result.tracks[0].lanes.get('c'))});
 test('lane packing preserves native tracks and separates coincident points',()=>{const result=timelineLanes([{id:'a',track:'one',start:0,end:null},{id:'b',track:'one',start:0,end:null},{id:'c',track:'two',start:0,end:1}]);assert.equal(result.tracks.length,2);assert.equal(result.tracks[0].count,2);assert.equal(result.tracks[1].offset,2)});
+
+test('dense point hit areas remain selectable independently at display scale',()=>{
+ const events=[{id:'a',track:'native',start:186,end:null},{id:'b',track:'native',start:190,end:null},{id:'c',track:'native',start:194,end:null}];
+ const original=JSON.stringify(events),packed=timelineLanes(events,16);assert.equal(packed.rows,3);assert.equal(new Set(packed.tracks[0].lanes.values()).size,3);assert.equal(JSON.stringify(events),original);
+ assert.equal(timelineLanes(events,.5).rows,1);
+});

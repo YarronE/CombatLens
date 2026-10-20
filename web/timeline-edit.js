@@ -23,13 +23,14 @@ export function capturePointerGesture(target,pointerId,{onMove,onEnd,onError=()=
  return {cancel:()=>end(false)};
 }
 
-export function timelineLanes(events){
+export function timelineLanes(events,minimumSpan=0){
+ minimumSpan=finite(minimumSpan)&&minimumSpan>0?minimumSpan:0;
  const tracks=[];let offset=0;
  for(const key of [...new Set(events.map(e=>e.track||'事件'))]){
   const ends=[],lanes=new Map();
   for(const event of events.filter(e=>(e.track||'事件')===key).sort((a,b)=>a.start-b.start||String(a.id).localeCompare(String(b.id)))){
-   let lane=ends.findIndex(end=>end<=event.start);if(lane<0)lane=ends.length;
-   ends[lane]=finite(event.end)&&event.end>event.start?event.end:event.start+1e-9;lanes.set(event.id,lane);
+   let lane=ends.findIndex(end=>end<=event.start-minimumSpan/2);if(lane<0)lane=ends.length;
+   ends[lane]=(finite(event.end)&&event.end>event.start?event.end:event.start+1e-9)+minimumSpan/2;lanes.set(event.id,lane);
   }
   tracks.push({key,offset,count:ends.length,lanes});offset+=ends.length;
  }
