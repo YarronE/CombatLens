@@ -44,11 +44,11 @@ export function inspectGLB(buffer,{kind='skinned_animation'}={}) {
   const binStart=20+length,binLength=view.getUint32(binStart,true),binType=view.getUint32(binStart+4,true),declared=json.buffers[0].byteLength;
   if(binType!==0x004e4942||binLength%4!==0||binStart+8+binLength!==buffer.byteLength||!Number.isSafeInteger(declared)||declared<0||binLength-declared<0||binLength-declared>3)throw new Error('GLB BIN 或 buffer 长度不匹配。');
   if(kind==='static_mesh'){if(json.skins?.length||json.animations?.length||json.nodes?.some(n=>n.skin!==undefined)||json.meshes?.some(m=>m.primitives?.some(p=>Object.keys(p.attributes||{}).some(k=>/^(JOINTS|WEIGHTS)_/.test(k)))))throw new Error('静态预览不能包含隐藏的骨架或动画。');if(!json.nodes?.some(n=>Number.isInteger(n.mesh)&&n.mesh>=0&&n.mesh<(json.meshes?.length||0)))throw new Error('静态预览没有实际网格。');return json;}
-  if((json.skins||[]).length!==1)throw new Error('本版需要一个真实匹配骨架。');
+  if(!json.skins?.length)throw new Error('GLB 需要真实匹配骨架。');
   if(!json.animations?.length)throw new Error('GLB 尚无真实动画片段。');
-  const joints=json.skins[0].joints;
-  if(!Array.isArray(joints)||!joints.length||new Set(joints).size!==joints.length||joints.some(j=>!Number.isInteger(j)||j<0||j>=json.nodes?.length))throw new Error('骨骼索引不完整。');
-  if(!json.nodes?.some(n=>n.skin===0&&Number.isInteger(n.mesh)&&n.mesh>=0&&n.mesh<(json.meshes?.length||0)))throw new Error('GLB 尚无绑定骨架的真实网格。');
+  for(const skin of json.skins){const joints=skin.joints;if(!Array.isArray(joints)||!joints.length||new Set(joints).size!==joints.length||joints.some(j=>!Number.isInteger(j)||j<0||j>=json.nodes?.length))throw new Error('骨骼索引不完整。');}
+  for(const node of json.nodes||[])if(node.skin!==undefined&&(!Number.isInteger(node.skin)||node.skin<0||node.skin>=json.skins.length||!Number.isInteger(node.mesh)||node.mesh<0||node.mesh>=(json.meshes?.length||0)))throw new Error('网格的骨架引用不完整。');
+  if(!json.nodes?.some(n=>n.skin!==undefined&&Number.isInteger(n.mesh)))throw new Error('GLB 尚无绑定骨架的真实网格。');
   return json;
 }
 

@@ -45,3 +45,11 @@ test('explicit static mesh mode loads actual GLTF geometry without fabricated an
 test('static metadata cannot conceal animated or rigged bytes',()=>{assert.throws(()=>inspectGLB(syntheticGLB(),{kind:'static_mesh'}));assert.throws(()=>inspectGLB(syntheticGLB({skins:[],animations:[],nodes:[{mesh:0}]}),{kind:'static_mesh'}));assert.throws(()=>inspectGLB(syntheticGLB(),{kind:'invented'}));});
 
 test('static framing fits actual box corners at wide and narrow viewport aspects',async()=>{const {AssetViewer}=await import('./viewer.js');for(const aspect of [.45,3.5]){const box=new THREE.Box3(new THREE.Vector3(-2,-1,-.5),new THREE.Vector3(2,2,.5)),center=box.getCenter(new THREE.Vector3()),context={camera:{fov:45,aspect}},distance=AssetViewer.prototype.staticCameraDistance.call(context,box,center)*Math.hypot(.8,.35,1),direction=new THREE.Vector3(.8,.35,1).normalize(),right=new THREE.Vector3().crossVectors(new THREE.Vector3(0,1,0),direction).normalize(),up=new THREE.Vector3().crossVectors(direction,right).normalize(),tanY=Math.tan(Math.PI/8);for(const x of [box.min.x,box.max.x])for(const y of [box.min.y,box.max.y])for(const z of [box.min.z,box.max.z]){const p=new THREE.Vector3(x,y,z).sub(center),depth=distance-p.dot(direction);assert.ok(Math.abs(p.dot(right))<=depth*tanY*aspect);assert.ok(Math.abs(p.dot(up))<=depth*tanY);}}});
+
+
+test('multiple source skins bind meshes independently in GLTFLoader',async()=>{
+  const skins=[{joints:[0,1],skeleton:0,inverseBindMatrices:4},{joints:[0,1],skeleton:0,inverseBindMatrices:4}],nodes=[{name:'synthetic-root',children:[1]},{name:'synthetic-joint-1'},{name:'one',mesh:0,skin:0},{name:'two',mesh:0,skin:1}],buffer=syntheticGLB({skins,nodes,scenes:[{nodes:[0,2,3]}]});
+  assert.equal(inspectGLB(buffer).skins.length,2);
+  const gltf=await new GLTFLoader().parseAsync(buffer,''),meshes=[];gltf.scene.traverse(n=>{if(n.isSkinnedMesh)meshes.push(n);});assert.equal(meshes.length,2);assert.notEqual(meshes[0].skeleton,meshes[1].skeleton);
+  assert.throws(()=>inspectGLB(syntheticGLB({skins,nodes:[...nodes,{mesh:0,skin:2}]})));
+});

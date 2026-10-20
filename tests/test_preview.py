@@ -257,3 +257,25 @@ class RigHierarchyTests(unittest.TestCase):
                 else:d['animations'][0]['channels'].append({'sampler':0,'target':{'node':1,'path':'scale'}})
                 d['animations'][0]['channels'][0]['target']['node']=2
             with self.subTest(reachable=reachable),self.assertRaises(ValueError):self.inspect(mutate)
+
+
+class MultiSkinTests(unittest.TestCase):
+    inspect = RigHierarchyTests.inspect
+    def test_independent_skin_joint_sets_are_preserved(self):
+        def mutate(d):
+            d['nodes'].extend([{'name':'second-joint'},{'mesh':0,'skin':1}])
+            d['skins'].append({'joints':[2]})
+            d['scenes'][0]['nodes'].extend([2,3])
+        self.assertEqual(len(self.inspect(mutate)['skins']),2)
+
+    def test_each_skin_binding_checks_vertex_indices_and_matrix_count(self):
+        import io
+        def mutate(d):
+            d['nodes'].extend([{'name':'second-joint'},{'mesh':0,'skin':1}])
+            d['skins'].append({'joints':[1,2]})
+            d['scenes'][0]['nodes'].extend([2,3])
+        raw=bytearray(fixture(mutate=mutate));start=28+struct.unpack_from('<I',raw,12)[0]
+        struct.pack_into('<H',raw,start+36,1)
+        with self.assertRaises(ValueError):preview_module.inspect_glb(io.BytesIO(raw),len(raw))
+        def bad_skin(d):d['nodes'][0]['skin']=5
+        with self.assertRaises(ValueError):self.inspect(bad_skin)

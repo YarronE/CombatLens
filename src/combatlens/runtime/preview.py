@@ -138,20 +138,21 @@ def inspect_glb(handle, size, kind="skinned_animation"):
         if not any('mesh' in n for n in nodes):raise ValueError('Static previews require a mesh node.')
     else:
         skins = objects(doc.get('skins'), 'skins', True)
-        if len(skins) != 1:
-            raise ValueError('The preview supports exactly one skin.')
-        joints = skins[0].get('joints')
-        if not isinstance(joints, list) or not joints or any(type(joint) is not int or not 0 <= joint < len(nodes) for joint in joints) or len(set(joints)) != len(joints):
-            raise ValueError('Skin joint indices are invalid or duplicate.')
-        joint_set = set(joints)
-        if 'skeleton' in skins[0] and integer(skins[0]['skeleton']) >= len(nodes):
-            raise ValueError('Skin skeleton is outside nodes.')
-        if 'inverseBindMatrices' in skins[0]:
-            _, accessor = accessor_at(skins[0]['inverseBindMatrices'], 'MAT4', (5126,))
-            if accessor['count'] != len(joints):
-                raise ValueError('Inverse-bind matrix count differs from joints.')
+        skin_joints=[]
+        joint_set=set()
+        for skin in skins:
+            joints=skin.get('joints')
+            if not isinstance(joints,list) or not joints or any(type(joint) is not int or not 0<=joint<len(nodes) for joint in joints) or len(set(joints))!=len(joints):
+                raise ValueError('Skin joint indices are invalid or duplicate.')
+            skin_joints.append(joints);joint_set.update(joints)
+            if 'skeleton' in skin and integer(skin['skeleton'])>=len(nodes):
+                raise ValueError('Skin skeleton is outside nodes.')
+            if 'inverseBindMatrices' in skin:
+                _,accessor=accessor_at(skin['inverseBindMatrices'],'MAT4',(5126,))
+                if accessor['count']!=len(joints):
+                    raise ValueError('Inverse-bind matrix count differs from joints.')
     parents = {}
-    bound_meshes = set()
+    bound_meshes = {}
     for index, node in enumerate(nodes):
         children = node.get('children', [])
         if not isinstance(children, list):
@@ -171,9 +172,10 @@ def inspect_glb(handle, size, kind="skinned_animation"):
             if mesh >= len(meshes):
                 raise ValueError('Node mesh is outside meshes.')
             if 'skin' in node:
-                if integer(node['skin']) != 0:
+                skin_index=integer(node['skin'])
+                if static or skin_index>=len(skins):
                     raise ValueError('Node references an unsupported skin.')
-                bound_meshes.add(mesh)
+                bound_meshes.setdefault(mesh,set()).add(skin_index)
         elif 'skin' in node:
             raise ValueError('Skin is not bound to mesh geometry.')
     if not static and not bound_meshes:
@@ -218,7 +220,7 @@ def inspect_glb(handle, size, kind="skinned_animation"):
                     raise ValueError('Actual primitive indices exceed the vertices.')
             if mesh_index in bound_meshes:
                 index, joint_accessor = accessor_at(attributes.get('JOINTS_0'), 'VEC4', (5121, 5123))
-                if joint_accessor.get('normalized') or any(any(joint >= len(joints) for joint in row) for row in rows(index)):
+                if joint_accessor.get('normalized') or any(any(joint >= min(len(skin_joints[skin_index]) for skin_index in bound_meshes[mesh_index]) for joint in row) for row in rows(index)):
                     raise ValueError('Actual vertex joint index exceeds the skin joints.')
                 index, weights = accessor_at(attributes.get('WEIGHTS_0'), 'VEC4', (5121, 5123, 5126))
                 if weights['componentType'] != 5126 and not weights.get('normalized'):

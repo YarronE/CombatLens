@@ -94,5 +94,9 @@ to the authorized private case project; all assets/datasets remain local.
 Skeletal compatibility iteration: active scene root and attachment channels are
 accepted only when each clip drives the registered rig or its real ancestors.
 Unreachable nodes, unrelated-only animation and invalid binary/source proofs
-remain rejected. 78 Python and 73 Node checks pass. Case extraction stays local;
+remain rejected. 80 Python and 74 Node checks pass. Case extraction stays local;
 native event coordinates need proof independently of animation sample times.
+
+Multiple native skins retain independent joint arrays and inverse bind matrices.
+Each mesh binding is checked against its own skin; shared geometry is checked
+against every binding. No source bind space is merged or retargeted.

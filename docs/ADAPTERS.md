@@ -160,3 +160,8 @@ unrelated helper-only clips, unreachable targets and invalid key data remain rej
 Decoded padding past an authored clip endpoint must not extend that clip. Native
 state/event clocks need independent proof; use separate source-backed clip sequences
 when the native event clock or controller binding is unresolved.
+
+Multiple source skins are supported. Each skinned node must reference its actual
+skin; preserve per-skin inverse binds and vertex joint indices. The optional
+joint_count counts unique node IDs across all skins. Source geometry may include
+unskinned attachments, while the file still needs a real animated rig.
