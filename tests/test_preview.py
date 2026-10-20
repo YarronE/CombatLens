@@ -196,3 +196,34 @@ class PreviewTests(unittest.TestCase):
 
 
 if __name__=='__main__': unittest.main()
+
+
+def static_fixture(mutate=None):
+    def change(doc):
+        doc.pop('skins');doc.pop('animations');doc['nodes']=[{'mesh':0}];doc['scenes']=[{'nodes':[0]}]
+        doc['meshes'][0]['primitives'][0]['attributes']={'POSITION':0}
+        if mutate:mutate(doc)
+    return fixture(mutate=change)
+
+class StaticOnlyTests(unittest.TestCase):
+    setUp=PreviewTests.setUp
+    tearDown=PreviewTests.tearDown
+    replace_glb=PreviewTests.replace_glb
+    write_manifest=PreviewTests.write_manifest
+    def static(self,raw=None):
+        self.manifest['assets'][0].update(kind='static_mesh',clips=[])
+        self.replace_glb(raw or static_fixture())
+    def test_explicit_static_geometry_has_no_animation_clock(self):
+        self.static();asset=self.preview.response()['assets'][0];self.assertEqual(asset['status'],'ready');self.assertEqual(asset['clips'],[])
+        handle,_,_=self.preview.binary('synthetic-only');handle.close()
+    def test_static_kind_cannot_hide_rig_animation_or_skin_attributes(self):
+        for mutate in [lambda d:d.update(skins=[{'joints':[0]}]),lambda d:d.update(animations=[{}]),lambda d:d['nodes'][0].update(skin=0),lambda d:d['meshes'][0]['primitives'][0]['attributes'].update(JOINTS_0=1)]:
+            self.static(static_fixture(mutate));self.assertEqual(self.preview.response()['assets'][0]['status'],'unavailable')
+    def test_default_mode_remains_strict_and_mode_changes_invalidate_cached_doc(self):
+        self.static();self.assertEqual(self.preview.response()['assets'][0]['status'],'ready')
+        self.manifest['assets'][0].pop('kind');self.manifest['assets'][0]['clips']=[{'id':'x','name':'synthetic-clip','animation_index':0,'clip_duration_seconds':1,'source_ids':['source-one']}]
+        # Missing rig remains invalid even if its same path/bytes were cached as static.
+        self.write_manifest();self.assertNotEqual(self.preview.response()['assets'][0]['status'],'ready')
+    def test_static_empty_invalid_geometry_is_rejected(self):
+        for mutate in [lambda d:d['meshes'][0].update(primitives=[]),lambda d:d['accessors'][0].update(count=1000),lambda d:d['nodes'][0].update(children=[0]),lambda d:d['scenes'][0].update(nodes=[])]:
+            self.static(static_fixture(mutate));self.assertEqual(self.preview.response()['assets'][0]['status'],'unavailable')

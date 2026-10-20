@@ -1,13 +1,13 @@
 # Status
 
-Version 0.6.0, 2026-10-19.
+Version 0.7.0, 2026-10-20.
 
 Implemented request routing, reviewed local adapter registration, independent
 research runs, source checks, stage reports, research overview and the generic
 action workspace. Registered models and animations use source-backed mapping;
 analysis copies save separately with revision conflicts and atomic writes.
 
-Validation passed: 56 Python tests, 66 Node tests, and actual browser checks for
+Validation passed: 67 Python tests, 69 Node tests, and actual browser checks for
 model display, sampling, event positioning, copy save/reopen/reset, desktop and
 narrow layout. Test fixtures in Git are synthetic. The installed Skill launcher
 has completed a real local request; a separate app-server also reports the repo Skill enabled; current-window menu refresh remains unverified.
@@ -73,3 +73,20 @@ known/unknown instances, rate-two mapping, early-load selection, playback pause,
 frame step, analysis save/reopen and 390px layout. Synthetic no-guide/no-model
 fallback remains explicit. Current regressions: 56 Python and 66 Node passed.
 All private guides, game inputs and screenshots stay outside public Git.
+
+Second-case workflow iteration: shared local freeze now creates an exclusive
+fixed-installation bundle with exact research bytes, content-hashed evidence,
+registered previews, pinned local interpretation/theme, compatible copies and
+selected acceptance attachments. Failed output stays explicitly incomplete;
+source runs and active pointers remain unchanged. Full relocation is not claimed.
+Explicit static_mesh mode displays actual source geometry without inventing a
+rig, playback clock or sample sequence. Default animated validation stays strict.
+Native configuration labels and exact source-record links use the same editor.
+The analysis catalog now isolates exact Build/package identity across cases.
+
+67 Python and 69 Node tests pass. Two separately prepared local datasets were
+validated through the shared renderer; actual browser checks cover frozen reopen,
+original evidence, static model/orbit/reset, native data links and AI navigation,
+copy editing/history/save/reopen and narrow layout. No new complete unpacking or
+game-runtime observation is claimed. Case-specific integration is delivered only
+to the authorized private case project; all assets/datasets remain local.

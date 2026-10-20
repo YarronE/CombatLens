@@ -84,3 +84,21 @@ python scripts/check_publish.py
 ```
 
 运行状态与实际边界见 [STATUS](docs/STATUS.md)。
+
+## 保存到本地游戏分析包
+
+```sh
+python run.py freeze /path/to/game-project/local/snapshots/version --research /path/to/run
+```
+
+目标目录必须尚不存在。归包包含固定页面与运行代码、研究数据、已登记证据和
+预览文件，以及匹配当前研究的已保存副本。解释与主题也会固定，原始包字节和
+研究指纹保持不变。用 `--attachment FILE` 附带选定验收文件，每份最多16 MiB。
+
+在包目录运行 `python run.py start`，打开返回的本地URL。归包数据只留本地，
+不要提交整个目录。包会复制已登记证据，可能占用较多空间，结果回执列出字节数。
+当前采用固定本机路径，移动目录后需要重新绑定来源；完整跨设备恢复尚未验证。
+
+静态模型无需先有骨骼动画。适配器可明确登记 static_mesh，工作台显示真实几何，
+并禁用缺少依据的播放与逐帧。原生配置状态不自动当成独立招式，未确认的时钟
+继续使用来源坐标。副本列表只显示当前Build和研究指纹，其他案例文件保留原位。

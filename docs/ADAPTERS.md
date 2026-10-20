@@ -101,3 +101,36 @@ reader verifies provenance; it cannot prove that prose faithfully describes code
 Review is required before local registration. Real case guides and their evidence
 remain private; synthetic tests document the public contract. No target game code
 executes when a guide is read, and no new extraction or runtime simulation is implied.
+
+## Static geometry and native configuration scopes
+
+A preview-source/1 asset may explicitly declare `kind: "static_mesh"` with
+`clips: []`. It still requires registered object/sequence/source IDs, exact GLB
+hash/length, format and local_path beneath local/preview. Include material_status,
+source_paths.mesh, geometry, coordinates and assembly_status as evidence notes.
+Each separate mesh stays separate when assembly transforms are unproven.
+
+Static GLBs must contain visible finite geometry in the selected scene and no
+skin, skin attributes or animations. Their vertices/indices and hierarchy receive
+the same bounded checks as animated assets. The omitted/default kind remains
+skinned_animation with all existing rig and clip requirements. Static geometry
+does not enable a playback clock, frame indexes, bones or action-time mapping.
+
+For native state/configuration datasets, object.presentation.sequence_label can
+label the existing selector/count (default: 技能招式). It changes no source identity
+or action grouping. Keep unrelated states separate; equal/similar names do not
+prove a common AnimatorController or runtime binding. Use source_units when only
+serialized coordinates are established. Preserve simultaneous native time fields
+in raw_value; do not select their runtime precedence or infer a frame rate.
+
+An event may provide native_links, each with kind, name, optional scope/raw_value,
+boundary, registered source_ids and same-object sequence_ids. These are explicit
+data-reference joins, displayed in folded raw evidence. They never establish an
+execution rule. Exact original key plus original scope is required; missing or
+ambiguous links stay unresolved. Analysis modifications cannot rewrite these links.
+
+Use the shared freeze command for local case delivery. Keep game-specific adapter
+code in ignored local directories or an explicitly authorized private game repo;
+public CombatLens Git continues to contain generic implementation and synthetic
+checks only. Native parsers should state which original bytes were re-read on
+each generation rather than relabel an old validation report as a fresh check.

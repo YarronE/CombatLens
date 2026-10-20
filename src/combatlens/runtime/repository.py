@@ -225,6 +225,8 @@ class Repository:
         return path
 
     def analyses(self):
+        package, fingerprint = self.research()
+        build = self.timelines(fingerprint)["game_build"]
         results = []
         if self.analyses_dir.exists():
             for path in sorted(self.analyses_dir.glob("*.json")):
@@ -233,7 +235,7 @@ class Repository:
                 safe = self.analysis_path(path.stem)
                 try:
                     value, _ = read_json(safe)
-                    if value.get("schema_version") == "timeline-analysis/1" and value.get("analysis_id") == path.stem:
+                    if value.get("schema_version") == "timeline-analysis/1" and value.get("analysis_id") == path.stem and value.get("game_build") == build and value.get("parent_package_fingerprint") == fingerprint:
                         results.append({key: value.get(key) for key in ("analysis_id", "name", "revision", "saved_at")} | {"path": str(safe)})
                 except (WorkbenchError, AttributeError):
                     continue

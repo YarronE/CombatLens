@@ -35,13 +35,15 @@ def objects(value, label, nonempty=False):
     return value
 
 
-def inspect_glb(handle, size):
+def inspect_glb(handle, size, kind="skinned_animation"):
     """Check embedded bytes, geometry, rig and joint animation without execution.
 
     Accessor values are read in bounded batches, including interleaved vertices.
     JSON min/max is never used as proof of animation keys or vertex bounds.
     The private bounds added to the returned document are recomputed from BIN.
     """
+    if kind not in {'skinned_animation','static_mesh'}:raise ValueError('Unsupported preview kind.')
+    static=kind=='static_mesh'
     handle.seek(0)
     header = handle.read(20)
     if len(header) != 20:
@@ -129,20 +131,25 @@ def inspect_glb(handle, size):
         if accessor['componentType'] == 5126 and any(not all(math.isfinite(value) for value in row) for row in rows(index)):
             raise ValueError('Nonfinite actual accessor values.')
     nodes = objects(doc.get('nodes'), 'nodes', True)
-    skins = objects(doc.get('skins'), 'skins', True)
     meshes = objects(doc.get('meshes'), 'meshes', True)
-    if len(skins) != 1:
-        raise ValueError('The preview supports exactly one skin.')
-    joints = skins[0].get('joints')
-    if not isinstance(joints, list) or not joints or any(type(joint) is not int or not 0 <= joint < len(nodes) for joint in joints) or len(set(joints)) != len(joints):
-        raise ValueError('Skin joint indices are invalid or duplicate.')
-    joint_set = set(joints)
-    if 'skeleton' in skins[0] and integer(skins[0]['skeleton']) >= len(nodes):
-        raise ValueError('Skin skeleton is outside nodes.')
-    if 'inverseBindMatrices' in skins[0]:
-        _, accessor = accessor_at(skins[0]['inverseBindMatrices'], 'MAT4', (5126,))
-        if accessor['count'] != len(joints):
-            raise ValueError('Inverse-bind matrix count differs from joints.')
+    joints=[];joint_set=set()
+    if static:
+        if doc.get('skins') or doc.get('animations') or any('skin' in n for n in nodes):raise ValueError('Static previews cannot contain rigs or animation.')
+        if not any('mesh' in n for n in nodes):raise ValueError('Static previews require a mesh node.')
+    else:
+        skins = objects(doc.get('skins'), 'skins', True)
+        if len(skins) != 1:
+            raise ValueError('The preview supports exactly one skin.')
+        joints = skins[0].get('joints')
+        if not isinstance(joints, list) or not joints or any(type(joint) is not int or not 0 <= joint < len(nodes) for joint in joints) or len(set(joints)) != len(joints):
+            raise ValueError('Skin joint indices are invalid or duplicate.')
+        joint_set = set(joints)
+        if 'skeleton' in skins[0] and integer(skins[0]['skeleton']) >= len(nodes):
+            raise ValueError('Skin skeleton is outside nodes.')
+        if 'inverseBindMatrices' in skins[0]:
+            _, accessor = accessor_at(skins[0]['inverseBindMatrices'], 'MAT4', (5126,))
+            if accessor['count'] != len(joints):
+                raise ValueError('Inverse-bind matrix count differs from joints.')
     parents = {}
     bound_meshes = set()
     for index, node in enumerate(nodes):
@@ -169,7 +176,7 @@ def inspect_glb(handle, size):
                 bound_meshes.add(mesh)
         elif 'skin' in node:
             raise ValueError('Skin is not bound to mesh geometry.')
-    if not bound_meshes:
+    if not static and not bound_meshes:
         raise ValueError('No mesh is bound to the preview skeleton.')
     visited = set()
     for start in range(len(nodes)):
@@ -180,10 +187,22 @@ def inspect_glb(handle, size):
             seen.add(current)
             current = parents.get(current)
         visited.update(seen)
+    scenes=objects(doc.get('scenes'), 'scenes', True)
+    if integer(doc.get('scene',0))>=len(scenes):raise ValueError('Default scene is invalid.')
+    for scene in scenes:
+        roots=scene.get('nodes',[])
+        if not isinstance(roots,list) or any(type(i) is not int or i<0 or i>=len(nodes) or i in parents for i in roots) or len(set(roots))!=len(roots):raise ValueError('Scene roots are invalid.')
+    reachable=set();pending=list(scenes[doc.get('scene',0)].get('nodes',[]))
+    while pending:
+        node=pending.pop()
+        if node in reachable:continue
+        reachable.add(node);pending.extend(nodes[node].get('children',[]))
+    if not any('mesh' in nodes[i] for i in reachable):raise ValueError('Active scene has no reachable mesh geometry.')
     for mesh_index, mesh in enumerate(meshes):
         primitives = objects(mesh.get('primitives'), 'mesh primitives', True)
         for primitive in primitives:
             attributes = primitive.get('attributes')
+            if static and isinstance(attributes,dict) and any(k.startswith(('JOINTS_','WEIGHTS_')) for k in attributes):raise ValueError('Static previews cannot conceal skin attributes.')
             if not isinstance(attributes, dict):
                 raise ValueError('Geometry requires attribute accessors.')
             position_index, position = accessor_at(attributes.get('POSITION'), 'VEC3', (5126,))
@@ -207,7 +226,7 @@ def inspect_glb(handle, size):
                 maximum = 1 if weights['componentType'] == 5126 else (255 if weights['componentType'] == 5121 else 65535)
                 if any(any(value < 0 or value > maximum for value in row) or sum(row) <= 0 for row in rows(index)):
                     raise ValueError('Actual skin weights are invalid or empty.')
-    animations = objects(doc.get('animations'), 'animations', True)
+    animations = objects(doc.get('animations',[]) if static else doc.get('animations'), 'animations', not static)
     time_bounds = {}
     animation_bounds = []
     for animation in animations:
@@ -290,7 +309,10 @@ class PreviewRepository:
                 if not isinstance(oid, str) or oid not in registered or not strings(asset.get('sequence_ids'), 'Preview sequences') <= registered[oid].keys():
                     raise ValueError('Preview object or sequence is not registered.')
                 source_ids(asset.get('source_ids'))
-                clips = objects(asset.get('clips', []), 'Preview clips', asset.get('status') == 'ready')
+                kind=asset.get('kind','skinned_animation')
+                if kind not in {'skinned_animation','static_mesh'}:raise ValueError('Unsupported preview kind.')
+                if kind=='static_mesh' and asset.get('clips'):raise ValueError('Static preview cannot declare animation clips.')
+                clips = objects(asset.get('clips', []), 'Preview clips', asset.get('status') == 'ready' and kind!='static_mesh')
                 for clip in clips:
                     source_ids(clip.get('source_ids'))
                     if not isinstance(clip.get('name'), str) or not clip['name']:
@@ -334,15 +356,16 @@ class PreviewRepository:
         try:
             stat = os.fstat(handle.fileno())
             size = stat.st_size
-            key = self.stat_key(path, stat)
+            kind=asset.get('kind','skinned_animation')
+            key = self.stat_key(path, stat)+(kind,)
             if not 20 <= size <= MAX_GLB or type(asset.get('bytes')) is not int or size != asset['bytes']:
                 raise ValueError('Preview length changed or exceeds the bound.')
             cached = self.asset_cache.get(key)
             sha = cached[0] if cached else hashlib.file_digest(handle, 'sha256').hexdigest()
             if sha != asset.get('sha256'):
                 raise WorkbenchError('Preview bytes changed.', status=409, code='preview_changed')
-            doc = cached[1] if cached else inspect_glb(handle, size)
-            if self.stat_key(path, os.fstat(handle.fileno())) != key:
+            doc = cached[1] if cached else inspect_glb(handle, size, kind)
+            if self.stat_key(path, os.fstat(handle.fileno()))+(kind,) != key:
                 raise WorkbenchError('Preview changed during validation.', status=409, code='preview_changed')
             for clip in asset.get('clips', []):
                 index = clip['animation_index']

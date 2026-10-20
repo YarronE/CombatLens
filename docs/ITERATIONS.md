@@ -113,3 +113,29 @@ and source hashes remain unchanged. No new extraction, runtime observation or RE
 fork is claimed. All case notes, evidence and screenshots remain local.
 
 Spec: openspec/changes/archive/2026-10-19-add-designer-event-details/ (verified and archived).
+
+## 2026-10-20 / Local bundles and independently prepared native case
+
+Request: preserve the completed local case in its own analysis package, then reuse
+existing unpacking practice for a second case; improve the generic workflow and
+deliver its integration to the authorized private case repository. Game data must
+remain outside public Git.
+
+Implemented a source-current, exclusive freeze command with hashed copied evidence,
+pinned runtime and optional reviewed overlays. Research bytes/fingerprint and
+copy revisions remain unchanged. Explicit static GLB mode retains actual geometry
+while disabling unproven clocks/frames. Native configuration scopes retain their
+own selector label and raw field references. Exact data links appear before long
+raw JSON. The second-case check exposed mixed-game copy listings; these are now
+scoped to current Build/package, preserving other files on disk.
+
+Observed: 67 Python and 69 Node checks passed. Actual browser verified frozen
+prior-case explanations/sampling and saved-copy listing, static source meshes,
+native coordinate editing/history/save/reopen, scoped exact references and AI
+links, object clearing and narrow layout. Previously exported native payloads
+were independently re-read; results are reuse/verification, not new extraction.
+No FPS, complete assembly, skeletal binding or runtime callback was fabricated.
+No game inputs, names, findings, adapters or screenshots enter this public change.
+
+Spec: openspec/changes/add-local-bundles-static-preview/ (validation complete;
+delivery and archival tracked in Tasks).

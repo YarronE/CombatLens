@@ -80,6 +80,7 @@ def main(argv=None):
     show=sub.add_parser('demo');show.add_argument('--open',action='store_true');show.add_argument('--port',type=int,default=8877)
     running=sub.add_parser('serve');running.add_argument('--research',type=Path);running.add_argument('--port',type=int,default=8877);running.add_argument('--ready',type=Path)
     sub.add_parser('start')
+    snapshot=sub.add_parser('freeze');snapshot.add_argument('destination',type=Path);snapshot.add_argument('--research',type=Path);snapshot.add_argument('--attachment',type=Path,action='append',default=[])
     args=parser.parse_args(argv)
     try:
         if args.command=='doctor':result={'python':sys.version.split()[0],'rea_cli':shutil.which('rea'),'adapters':[{'id':item['id'],'entrypoint_present':Path(item['entrypoint']).is_file(),'capabilities':item.get('capabilities',[])} for item in configured()['adapters']],'note':'REA MCP availability is checked by the agent; a missing CLI does not prove the MCP is unavailable.'}
@@ -93,6 +94,9 @@ def main(argv=None):
         elif args.command in ['demo','analyze']:
             result=demo() if args.command=='demo' else analyze(args.request,adapter_id=args.adapter)
             if args.open:result['service']=start(Path(result['research_dir']),args.port)
+        elif args.command=='freeze':
+            from .bundle import freeze
+            result=freeze(ROOT,args.research or active(),args.destination,args.attachment)
         elif args.command=='start':result=start(active())
         else:serve(args.research or active(),args.port,args.ready);return 0
         print(json.dumps(result,ensure_ascii=False,indent=2,allow_nan=False));return 0

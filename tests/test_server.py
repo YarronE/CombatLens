@@ -80,6 +80,14 @@ class WorkbenchTests(unittest.TestCase):
         except HTTPError as error:
             return error.code, json.loads(error.read())
 
+    def test_analysis_catalog_scopes_build_and_package_without_deleting_other_cases(self):
+        self.repository.analyses_dir.mkdir(parents=True,exist_ok=True)
+        for identity,build,fp in [('current','synthetic-build',self.fingerprint),('other-build','different',self.fingerprint),('other-package','synthetic-build','0'*64)]:
+            value={'schema_version':'timeline-analysis/1','analysis_id':identity,'game_build':build,'parent_package_fingerprint':fp,'revision':1}
+            (self.repository.analyses_dir/(identity+'.json')).write_text(json.dumps(value),encoding='utf-8')
+        self.assertEqual([v['analysis_id'] for v in self.repository.analyses()['analyses']],['current'])
+        self.assertEqual(len(list(self.repository.analyses_dir.glob('*.json'))),3)
+
     def test_save_reopen_revision_backup_and_source_unchanged(self):
         analysis = self.analysis()
         self.event(analysis)["analysis_override"] = self.override()

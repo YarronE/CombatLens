@@ -108,3 +108,19 @@ In analysis mode, explanations are labeled original-instance evidence. The sampl
 position follows the effective analysis time; changing parameters does not simulate
 the callback. Raw fields, sources and the edit form unfold on demand. Guide data
 never enters research packages, saved copies or undo history.
+
+## Static models and research-specific copies
+
+Explicit static meshes use the same viewport with rotation, zoom and reset. A
+short visible notice states that animation is unbound; playback, sampling and
+frame linkage remain unavailable. Asset proofs distinguish separate parts and
+unrecovered assembly/materials. Changing objects removes previous geometry.
+
+Native data references unfold ahead of long original JSON fields. They expose
+source-scoped original records and optional configuration jumps without claiming
+callback behavior. Native source coordinates do not become animation sample frames.
+
+The copy catalog is scoped to exact current Build and research fingerprint. Other
+case files remain intact in their corresponding research contexts. A local frozen
+bundle includes only compatible saved-copy identities and preserves revisions;
+it does not move the active source pointer or modify original evidence.
