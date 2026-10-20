@@ -102,3 +102,5 @@ Each mesh binding is checked against its own skin; shared geometry is checked
 against every binding. No source bind space is merged or retargeted.
 
 Authored-frame coordinate mappings require an explicit seconds_per_unit, matching sequence units and registered evidence. Coordinate scaling is separate from playback rate and animation sample numbering. Native frame counts and source state/clip lengths must be recovered by an adapter; sample rate alone does not prove an event clock. Event seek tolerates float32 source rounding within one ULP. Existing range, loop, step and playback cursor use the declared mapping unit. Runtime callbacks, transition mixing and hit-stop are outside static pose reconstruction.
+
+Acceptance: 81 Python and 79 Node checks passed. Actual local browser verified distinct dense-event clicks, authored-frame seek and stepping, loop/range, playback pause on selection and unknown-coordinate rejection. One-line generation inherits reviewed local bindings. Case assets and all acceptance outputs remain outside public Git.
