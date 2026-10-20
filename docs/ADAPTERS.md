@@ -151,3 +151,5 @@ use this URL scope, so separate tabs do not share a mutable selected object. The
 Host/Origin and source validation rules apply. The default run remains available at legacy URLs.
 The catalog supports up to 500 entries and 512 KiB. `freeze` captures the selected run; it does
 not bundle the entire collection. No game data belongs in the repository.
+
+Batch integrations may call `analyze(..., activate=False)` to validate individual runs without changing the current entry. Publish the chosen research pointer only after every required run and catalog is ready. The default single-run call still activates immediately after its validation.
