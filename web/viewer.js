@@ -147,7 +147,7 @@ export class AssetViewer {
   resetPlaybackRange(){const state=this.playbackState();if(state){this.setActionRange(state.mapping.action_in,state.mapping.action_out);this.setMessage('');}}
 
   seekEventFrame(time,unit){this.clock.pause();this.updateControls();const target=eventFrameTarget(this.clip,time,unit,this.clock.duration);if(target.status!=='ready')return target;this.clock.pause();this.clock.seek(target.clipTime);this.updateControls();return target;}
-  seekAction(time,unit) {if(!this.clip)return false;if(!clockMapping(this.clip,this.clock.duration)){this.setMessage('所选 Timeline 时钟尚未对应该动画。');return false;}const mapped=actionToClip(time,unit,this.clip);if(mapped===null){this.setMessage('该时间尚不能对应当前动画片段。');return false;}this.clock.pause();this.clock.seek(mapped);this.updateControls();return true;}
+  seekAction(time,unit) {if(!this.clip)return false;if(!clockMapping(this.clip,this.clock.duration)){this.setMessage('所选 Timeline 时钟尚未对应该动画。');return false;}const mapped=actionToClip(time,unit,this.clip);if(mapped===null){this.setMessage('该时间尚不能对应当前动画片段。');return false;}this.clock.pause();if(this.clock.time!==mapped)this.clock.seek(mapped);this.updateControls();return true;}
   runFrame() {
     cancelAnimationFrame(this.raf);const frame=now=>{if(!this.renderer||this.contextLost)return;const delta=this.lastFrame===null?0:Math.max((now-this.lastFrame)/1000,0);this.lastFrame=now;this.clock.tick(delta);this.updateControls();this.controls?.update();this.renderer.render(this.scene,this.camera);this.raf=requestAnimationFrame(frame);};this.lastFrame=null;this.raf=requestAnimationFrame(frame);
   }

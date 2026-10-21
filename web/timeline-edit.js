@@ -12,15 +12,29 @@ export function adjustedTiming(event,delta,edge,{low,high,step=0}){
 }
 
 // Shared lifecycle; injectable EventTargets allow deterministic cancel-path checks.
-export function capturePointerGesture(target,pointerId,{onMove,onEnd,onError=()=>{}},windowTarget=window){
- let finished=false;
- const move=e=>{if(e.pointerId!==pointerId||finished)return;e.preventDefault();try{onMove(e)}catch(error){onError(error);end(false)}};
- const up=e=>{if(e.pointerId!==pointerId||finished)return;move(e);if(!finished)end(true)};
- const cancel=e=>{if(e.pointerId===undefined||e.pointerId===pointerId)end(false)};
- const key=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();end(false)}};
- function end(commit){if(finished)return;finished=true;target.removeEventListener('pointermove',move);target.removeEventListener('pointerup',up);target.removeEventListener('pointercancel',cancel);target.removeEventListener('lostpointercapture',cancel);windowTarget.removeEventListener('blur',cancel);windowTarget.removeEventListener('keydown',key,true);if(target.hasPointerCapture(pointerId))target.releasePointerCapture(pointerId);onEnd(commit)}
+export function capturePointerGesture(target,pointerId,{onMove,onEnd,onError=()=>{},coalesce=false,requestFrame=globalThis.requestAnimationFrame,cancelFrame=globalThis.cancelAnimationFrame},windowTarget=window){
+ let finished=false,frame=null,pending=null;
+ const discard=()=>{if(frame!==null)cancelFrame(frame);frame=null;pending=null;};
+ const deliver=e=>{if(finished)return;try{onMove(e)}catch(error){try{onError(error)}finally{end(false)}}};
+ const flush=()=>{if(frame!==null)cancelFrame(frame);frame=null;const value=pending;pending=null;if(value&&!finished)deliver(value);};
+ const move=e=>{if(e.pointerId!==pointerId||finished)return;e.preventDefault();if(!coalesce){deliver(e);return;}pending=e;if(frame===null)frame=requestFrame(()=>{frame=null;const value=pending;pending=null;if(value&&!finished)deliver(value);});};
+ const up=e=>{if(e.pointerId!==pointerId||finished)return;move(e);end(true);};
+ const cancel=e=>{if(e.pointerId===undefined||e.pointerId===pointerId)end(false);};
+ const key=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();end(false);}};
+ function end(commit){if(finished)return;if(commit&&coalesce)flush();if(finished)return;finished=true;discard();target.removeEventListener('pointermove',move);target.removeEventListener('pointerup',up);target.removeEventListener('pointercancel',cancel);target.removeEventListener('lostpointercapture',cancel);windowTarget.removeEventListener('blur',cancel);windowTarget.removeEventListener('keydown',key,true);if(target.hasPointerCapture(pointerId))target.releasePointerCapture(pointerId);onEnd(commit);}
  target.addEventListener('pointermove',move);target.addEventListener('pointerup',up);target.addEventListener('pointercancel',cancel);target.addEventListener('lostpointercapture',cancel);windowTarget.addEventListener('blur',cancel);windowTarget.addEventListener('keydown',key,true);target.setPointerCapture(pointerId);
  return {cancel:()=>end(false)};
+}
+
+// Scrubbing changes only the inspection position; copy/history state belongs to the caller.
+export function bindTimelineScrub(target,{canStart,position,seek,isCurrent=()=>true,onStart=()=>{},onFinish=()=>{},onError=()=>{},requestFrame=globalThis.requestAnimationFrame,cancelFrame=globalThis.cancelAnimationFrame,windowTarget=window}){
+ const down=e=>{
+  if(e.button!==0||!canStart(e))return;const initial=position(e);if(!finite(initial))return;
+  e.preventDefault();e.stopPropagation();let gesture;
+  gesture=capturePointerGesture(target,e.pointerId,{coalesce:true,requestFrame,cancelFrame,onMove:value=>{if(!isCurrent()){gesture.cancel();return;}const time=position(value);if(finite(time))seek(time);},onEnd:onFinish,onError},windowTarget);
+  try{onStart(()=>gesture.cancel());if(isCurrent())seek(initial);else gesture.cancel();}catch(error){try{onError(error)}finally{gesture.cancel();}}
+ };
+ target.addEventListener('pointerdown',down);return ()=>target.removeEventListener('pointerdown',down);
 }
 
 export function timelineLanes(events,minimumSpan=0){

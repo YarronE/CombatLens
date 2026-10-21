@@ -151,3 +151,11 @@ against every binding. No source bind space is merged or retargeted.
 Request: bind native event instances to real clip poses without guessing missing clocks, keeping the compact editor and local-only case evidence.
 
 Added explicit authored-frame coordinate scale, separate from playback rate. The server and client reject missing, inconsistent or mismatched unit proofs. Range, loop, cursor and frame seek retain the declared action unit, with registered sample numbering independent of source authoring frames. Float32 rounding does not advance an extra sample. Synthetic validation uses different authoring and sample rates. Static pose positioning does not claim runtime callback execution, transition mixing or hit-stop reconstruction. Real mappings and all case inputs remain local.
+
+## 2026-10-21 / Smooth Timeline dragging
+
+Request: improve free dragging and reduce stutter while retaining model/Timeline linkage.
+
+The prior empty-axis path sought only after a completed click and rebuilt the workspace before updating the pose. Loaded-context scrubbing now follows captured pointer input directly. Latest-position coalescing covers scrub, event and range gestures; pointer-up flushes the final input, while cancellation drops pending work. Event movement still creates one undo entry. Identical-time seeks avoid redundant pose evaluation. Existing event selection, unit proofs, playback range and case isolation remain intact.
+
+Validation: 81 Python and 85 Node checks passed, including synthetic burst, final-flush, cancellation, context and history cases. Actual browser input verified intermediate pose updates, unchanged DOM during scrubbing, event undo/redo and range handles. All local measurements and case screenshots remain outside Git.

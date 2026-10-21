@@ -1,0 +1,5 @@
+# Design
+
+The existing seekTimelinePreview renders the full workspace before every seek. Replace this with a loaded, same-context fast path; preserve the asynchronous gate when a context really changes or loads. Add captured scrub gestures to the ruler and empty Timeline, excluding event and range targets and the pinned outliner. Route current-context seeks directly to the viewer, without repeated setContext or inspector rebuilds. Coalesce pointer delivery in capturePointerGesture with an injected animation-frame scheduler and a final synchronous flush. Apply the same optional coalescing to event and range drags. During scrubbing update only playhead text/cursor and the existing animation mixer; defer copy commits and lane rebuilding to release.
+
+No visual redesign, easing delay, invented frames or lower fidelity geometry is introduced. Use a temporary local-only console profiler to compare full workspace renders and native pose sampling, then remove profiling instrumentation before delivery. Keep the current local dataset and 8887 service.

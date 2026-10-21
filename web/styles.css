@@ -57,3 +57,5 @@
   .preview-speed{flex-wrap:wrap}
   .asset-proof .preview-metadata{max-height:280px;padding-right:4px}
 }
+
+.timeline-svg.scrubbing{cursor:ew-resize;user-select:none}
