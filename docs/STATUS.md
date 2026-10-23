@@ -1,6 +1,6 @@
 # Status
 
-Version 0.8.3, 2026-10-21.
+Version 0.9.0, 2026-10-24.
 
 Implemented request routing, reviewed local adapter registration, independent
 research runs, source checks, stage reports, research overview and the generic
@@ -106,3 +106,22 @@ Authored-frame coordinate mappings require an explicit seconds_per_unit, matchin
 Acceptance: 81 Python and 79 Node checks passed. Actual local browser verified distinct dense-event clicks, authored-frame seek and stepping, loop/range, playback pause on selection and unknown-coordinate rejection. One-line generation inherits reviewed local bindings. Case assets and all acceptance outputs remain outside public Git.
 
 Timeline drag iteration: ruler and empty-axis scrubbing updates the loaded pose and cursor directly. Same-context seeks preserve the workspace DOM. Event and range pointer bursts are processed once per animation frame, with an exact final flush and cancellation rollback. Repeated equal-time seeks skip redundant pose evaluation. Event edits still commit once and preserve source values, undo and redo. 81 Python and 85 Node checks pass. Actual browser gestures verified continuous pose updates without workspace rebuilds, event undo/redo and range handles. Local profiling is removed from delivered source; no GPU FPS guarantee is made.
+
+
+Evidence design-study iteration: three inspector views now show original event
+rhythm, source-backed numbers, and independent phase/selection conditions.
+Registered JSON pointers and dependencies are checked before facts are shown;
+bounded calculations and supported hypotheses fail closed on changed evidence.
+Confirmed events reuse the shared preview clock; unknown records retain the pose.
+The optional track filter prioritizes an adapter's reviewed attack track while
+preserving all events. Old packages and private frozen bundles remain supported.
+
+Animation framing now estimates bounds from sampled skinned vertices rather
+than remote bind joints, with a synthetic regression for this failure mode.
+Acceptance: 94 Python checks ran, 90 passed and 4 skipped because Windows symlink
+privileges were unavailable; 91 Node checks passed. Actual browser checks covered
+both action contexts, confirmed event seek, unknown-event no-seek, all study tabs,
+cross-workspace switching, and a native-frame/static-mesh case. Source-dependent
+failure, late-response isolation and private freeze closure have automated tests.
+The local cases remain limited samples. No full-game recovery, runtime damage,
+phase trigger probability, or reconstructed runtime FPS is claimed.

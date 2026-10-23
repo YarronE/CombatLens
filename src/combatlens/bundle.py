@@ -54,6 +54,10 @@ def freeze(root,research,destination,attachments=()):
             if sha(target)!=expected:raise ValueError('Snapshot preview copy failed.')
             asset['local_path']=target.name
         save_json(out/'preview.json',manifest)
+        if (research/'design-study.json').is_file():
+            study_path=research/'design-study.json'
+            if not study_path.resolve().is_relative_to(research.resolve()):raise ValueError('Study overlay path rejected.')
+            shutil.copy2(study_path,out/'design-study.json')
         if guide['status']=='ready':
             pinned=research/'event-guide.json'
             original=pinned if pinned.is_file() else root/'local/interpretations'/load_json(research/'run-report.json')['adapter']/'event-guide.json'

@@ -48,3 +48,20 @@ class BundleTests(unittest.TestCase):
    repo=Repository(Config(destination,research_dir=destination/'local/research/frozen'))
    self.assertEqual(resolve(repo)['status'],'ready')
   finally:fixture.tearDown()
+
+ def test_design_study_keeps_exact_overlay_and_closed_sources(self):
+  from test_design_study import StudyTests
+  from combatlens.runtime.design_study import resolve
+  from combatlens.runtime.repository import Config,Repository
+  fixture=StudyTests();fixture.setUp()
+  try:
+   for folder in ['src','web']:(fixture.root/folder).mkdir()
+   (fixture.root/'run.py').write_text('# synthetic')
+   raw=(fixture.run/'design-study.json').read_bytes()
+   destination=self.base/'closed-study';freeze(fixture.root,fixture.run,destination)
+   self.assertEqual((destination/'local/research/frozen/design-study.json').read_bytes(),raw)
+   fixture.evidence.write_text('{}')
+   repo=Repository(Config(destination,research_dir=destination/'local/research/frozen'))
+   result=resolve(repo);self.assertEqual(result['status'],'ready')
+   self.assertEqual(result['entries'][0]['calculations'][0]['value'],2)
+  finally:fixture.tearDown()

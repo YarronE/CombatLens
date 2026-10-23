@@ -165,3 +165,38 @@ Multiple source skins are supported. Each skinned node must reference its actual
 skin; preserve per-skin inverse binds and vertex joint indices. The optional
 joint_count counts unique node IDs across all skins. Source geometry may include
 unskinned attachments, while the file still needs a real animated rig.
+
+
+## Optional evidence design study
+
+Write run-local `design-study.json` with `schema: combatlens-design-study/1`,
+the exact `game_build`, `package_fingerprint`, and `entries`. Each entry has
+`object_id`, `sequence_id`, `facts`, `calculations`, `hypotheses`, and `gaps`.
+The optional `sequence.study_focus_track` chooses an initial rhythm filter;
+the user can still select every original track.
+
+Facts have a unique `id`, `label`, `view` (`rhythm`, `values`, or `phases`),
+`kind` (`configuration`, `observation`, or `author_statement`), `source_id`,
+an exact JSON `pointer`, optional `unit`, `note`, and `dependency_ids`.
+Values are resolved from hash-checked registered JSON, never from adapter
+literal claims. Register underlying binary/decompiler dependencies as well.
+Unknown fields remain gaps; false, zero, and dynamic structures stay distinct.
+
+Calculations declare `label`, `view`, `operation` (`difference` or `ratio`),
+and exactly two fact IDs in `inputs`. Inputs must be finite numbers with the
+same known unit; division by zero remains a gap. Hypotheses declare `view`,
+`text`, `validation`, and supporting `fact_ids`. Changed support suppresses
+the hypothesis. No arbitrary expressions are executed.
+
+The overlay is bounded to 2 MiB and 500 entries; source JSON to 64 MiB.
+The endpoint `/api/design-study` follows workspace/origin authorization.
+Missing overlays retain the legacy workspace. Frozen bundles preserve the
+overlay and its registered sources without changing the package fingerprint.
+
+Study event selection accepts explicitly confirmed coordinate statuses
+(`authored_montage_seconds`, `authored_frames`, `source_frame_only`,
+`native_seconds`, `confirmed`, or `synthetic`) and current evidence. A native
+coordinate alone cannot seek a model. A matching preview mapping and actual
+`sample_times_seconds` are required. Sample rate never proves runtime FPS.
+Unknown selections pause without moving the pose. Analysis mode displays the
+original study and disables its seek actions; copy editing remains separate.

@@ -16,6 +16,7 @@ from .preview import PreviewRepository
 from .presentation import resolve as resolve_presentation
 from .event_guide import resolve as resolve_event_guide
 from .collection import Collection
+from .design_study import resolve as resolve_design_study
 
 
 class WorkbenchServer(ThreadingHTTPServer):
@@ -93,6 +94,8 @@ class Handler(BaseHTTPRequestHandler):
                 self.reply(200, {"service": "combatlens", "api_version": 1,
                                  "pid": os.getpid(), "port": self.server.server_port,
                                  "workspace_fingerprint": hashlib.sha256(workspace).hexdigest()})
+            elif path == "/api/design-study":
+                self.reply(200, resolve_design_study(repository))
             elif path == "/api/event-guide":
                 self.reply(200, resolve_event_guide(repository))
             elif path in {"/api/presentation", "/api/presentation/hero"}:

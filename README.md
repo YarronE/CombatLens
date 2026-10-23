@@ -106,3 +106,13 @@ python run.py freeze /path/to/game-project/local/snapshots/version --research /p
 ## 多对象研究目录
 
 同一项目可登记多个独立研究包，通过页面顶部的选择框切换。每个对象只加载自己的来源、Timeline与AI，分析副本按研究包指纹隔离。已有单研究包链接保持可用。目录格式见 [适配器说明](docs/ADAPTERS.md#workspace-collection)。
+
+
+## Evidence design study
+
+The action inspector provides three views for event rhythm, ranges/numbers,
+and phase/selection conditions. Local adapters may attach reviewed evidence via
+`design-study.json`; see [the contract](docs/ADAPTERS.md#optional-evidence-design-study).
+Facts retain field provenance. Unknown conditions remain gaps. Confirmed event
+coordinates seek only through a proven matching preview clock and registered
+samples. Analysis copies preserve the original study as a read-only reference.

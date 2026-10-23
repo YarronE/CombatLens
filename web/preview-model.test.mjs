@@ -53,3 +53,9 @@ test('multiple source skins bind meshes independently in GLTFLoader',async()=>{
   const gltf=await new GLTFLoader().parseAsync(buffer,''),meshes=[];gltf.scene.traverse(n=>{if(n.isSkinnedMesh)meshes.push(n);});assert.equal(meshes.length,2);assert.notEqual(meshes[0].skeleton,meshes[1].skeleton);
   assert.throws(()=>inspectGLB(syntheticGLB({skins,nodes:[...nodes,{mesh:0,skin:2}]})));
 });
+
+test('animated framing samples rendered skin positions instead of remote bind joints',async()=>{
+ const {AssetViewer}=await import('./viewer.js');const root=new THREE.Group(),bone=new THREE.Bone();bone.position.x=100;root.add(bone);root.updateMatrixWorld(true);
+ const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute([0,0,0,1,0,0,0,1,0],3));geometry.setAttribute('skinIndex',new THREE.Uint16BufferAttribute([0,0,0,0,0,0,0,0,0,0,0,0],4));geometry.setAttribute('skinWeight',new THREE.Float32BufferAttribute([1,0,0,0,1,0,0,0,1,0,0,0],4));const mesh=new THREE.SkinnedMesh(geometry,new THREE.MeshBasicMaterial());root.add(mesh);mesh.bind(new THREE.Skeleton([bone]));
+ const viewer=Object.create(AssetViewer.prototype);Object.assign(viewer,{model:root,mixer:{timeScale:1,setTime(){}},clip:{},action:{},clock:{time:.2},keys:[0,1],applyTime(t){this.restored=t;}});viewer.buildObservationBounds();assert.ok(viewer.observationBounds.max.x<2);assert.ok(viewer.observationBounds.min.x<0);assert.equal(viewer.restored,.2);geometry.dispose();mesh.material.dispose();mesh.skeleton.dispose();
+});

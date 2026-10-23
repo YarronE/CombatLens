@@ -159,3 +159,14 @@ Request: improve free dragging and reduce stutter while retaining model/Timeline
 The prior empty-axis path sought only after a completed click and rebuilt the workspace before updating the pose. Loaded-context scrubbing now follows captured pointer input directly. Latest-position coalescing covers scrub, event and range gestures; pointer-up flushes the final input, while cancellation drops pending work. Event movement still creates one undo entry. Identical-time seeks avoid redundant pose evaluation. Existing event selection, unit proofs, playback range and case isolation remain intact.
 
 Validation: 81 Python and 85 Node checks passed, including synthetic burst, final-flush, cancellation, context and history cases. Actual browser input verified intermediate pose updates, unchanged DOM during scrubbing, event undo/redo and range handles. All local measurements and case screenshots remain outside Git.
+
+
+## 2026-10-24 — Evidence design study
+
+The approved v0.1 review requested three production views and animation seeking
+only for confirmed event coordinates. The shared inspector now resolves facts
+from registered fields, retains evidence gaps, and reuses existing selection and
+preview controls. Action-scoped asynchronous loading prevents old responses from
+crossing contexts. Calculations and hypotheses keep their own evidence status.
+Two reviewed local imports exercised animated-second and native-frame/static
+paths. Browser acceptance confirmed both outcomes. Case material stays local.
