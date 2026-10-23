@@ -20,8 +20,8 @@ REA is used through the agent's existing MCP, with readiness recorded locally.
 No new deep decompilation was performed in this release. A missing local CLI is
 reported independently from MCP availability.
 
-Next increments: normalized 3C navigation, deeper
-source-backed numeric explanations, and a second independently verified adapter.
+Next increments: normalized 3C navigation, broader source-backed explanations,
+and additional independently verified action/animation bindings.
 Universal extraction, original-game writeback and game-runtime simulation are
 not implemented.
 

@@ -1,13 +1,13 @@
 # ETHAN 项目接入
 
 - 项目 ID 为 `combatlens`。
-- 本机工程根目录为 `E:/Code/CombatLens`。
-- 知识库根目录为 `E:/Ethans`。
-- 通用规则为 `E:/Ethans/00_System/新项目通用协作规范.md`。
-- 个人风格为 `E:/Ethans/00_System/Context/05_Personal-Style.md`。
-- 传递约定为 `E:/Ethans/00_System/跨项目协作/instructions.md`。
-- 当前设计与本机案例记录见知识库 GameReverseWorkbench 项目目录。
-- 当前任务为 `openspec/changes/archive/2026-10-20-add-local-bundles-static-preview/`，状态见 `docs/STATUS.md`。
+- Current checkout on this machine: `Y:/CombatLens`; legacy machine: `E:/Code/CombatLens`.
+- Current vault root: `Y:/Ethans`; resolve legacy `E:/Ethans` references against this root.
+- Shared collaboration rules: `Y:/Ethans/00_System/新项目通用协作规范.md`.
+- Personal style: `Y:/Ethans/00_System/Context/05_Personal-Style.md`.
+- Handoff rules: `Y:/Ethans/00_System/跨项目协作/instructions.md`.
+- Current design and private acceptance records: vault `20_Projects/AI-Tech/CombatLens/`.
+- Current completed change: `openspec/changes/add-evidence-design-study/`; see `docs/STATUS.md`.
 
 ## 创建与同步约定
 
@@ -55,3 +55,17 @@
 来源作用域及独立时钟执行，不移用其他引擎的值。没有调用游戏或声称新实机验证。
 实际第二案例暴露的副本混列已修复；代码与合成检查进入公共工具，案例仍不公开。
 跨项目专有输入与仓库身份只在本地项目记录保存。本轮无需修改REA或安装Skill。
+
+
+## 2026-10-24 handoff
+
+The user approved design-study v0.1 and narrowed the local case scope in the
+active conversation. Implemented the shared study endpoint and three inspector
+views, preserving source validation, unknown timing and the existing preview
+clock. The existing evidence/instance rules were adopted; private imports do
+not modify their source projects. Generic changes passed regression and local
+browser acceptance and were pushed to codex/evidence-design-study. This branch
+has not been merged into main. No REA or Skill installation was required.
+
+Validation details and local case paths remain in the vault acceptance record.
+The reusable handoff is vault `00_System/跨项目协作/传递记录/2026-10-24-0cea7d31.md`.
