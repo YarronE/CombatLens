@@ -7,7 +7,7 @@
 - Personal style: `Y:/Ethans/00_System/Context/05_Personal-Style.md`.
 - Handoff rules: `Y:/Ethans/00_System/跨项目协作/instructions.md`.
 - Current design and private acceptance records: vault `20_Projects/AI-Tech/CombatLens/`.
-- Current completed change: `openspec/changes/add-evidence-design-study/`; see `docs/STATUS.md`.
+- Current completed change: `openspec/changes/add-whole-game-study/`; see `docs/STATUS.md`.
 
 ## 创建与同步约定
 
@@ -69,3 +69,15 @@ has not been merged into main. No REA or Skill installation was required.
 
 Validation details and local case paths remain in the vault acceptance record.
 The reusable handoff is vault `00_System/跨项目协作/传递记录/2026-10-24-0cea7d31.md`.
+
+
+## 2026-10-24 whole-game handoff
+
+Adopted vault transfer 8aa159c0-b215-447b-8847-8341d730d093: routine product and
+technical decisions are delegated, with written design and validation retained.
+The user expanded this tool to whole-game analysis using the existing local
+pilot. The optional game workspace covers lifecycle/system navigation, native
+records and references, distributions, same-frame projections and Build A/B.
+It preserves the prior action workspace and all source boundaries. Raw tables
+whose row size disagrees with the locked definition remain explicit gaps.
+Source projects were read only. Case imports and receipts stay under local/.

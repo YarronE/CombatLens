@@ -1,7 +1,8 @@
 # CombatLens
 
-面向动作游戏玩家和专业战斗策划的本地研究工具。让 Agent 接收一句研究请求，
-通过已登记适配器准备来源数据，生成分析概览与可编辑的动作工作区。
+A local research workbench for game players and designers. Reviewed adapters
+connect whole-game systems, source-backed records, build comparisons and the
+existing editable action/animation workspace.
 
 ```sh
 python run.py demo --open
@@ -116,3 +117,17 @@ and phase/selection conditions. Local adapters may attach reviewed evidence via
 Facts retain field provenance. Unknown conditions remain gaps. Confirmed event
 coordinates seek only through a proven matching preview clock and registered
 samples. Analysis copies preserve the original study as a read-only reference.
+
+
+## Whole-game analysis
+
+Open `game.html` for lifecycle and system navigation, native-table search,
+physical-row reference tracing, field distributions, same-frame coordinate
+projections and a Build A/B notebook. A compatible run promotes this entry on
+its overview page. Existing action workspaces remain available.
+
+Build drafts persist in the browser under the exact source fingerprint and
+export/import as JSON. Mode and slot checks inspect declared fields; candidate
+pools are never treated as simultaneously applied effects. Final damage,
+stacking rules, drop probabilities and route times require separate evidence.
+Adapters supply the optional [whole-game contract](docs/ADAPTERS.md#optional-whole-game-study).

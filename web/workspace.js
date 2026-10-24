@@ -19,7 +19,7 @@ export async function mountWorkspaces(){
     const select=document.createElement('select');select.setAttribute('aria-label',data.label||'研究对象');select.className='workspace-picker';
     for(const item of data.entries){const option=document.createElement('option');option.value=item.id;option.textContent=item.title;select.append(option)}
     select.value=workspacePrefix().split('/')[2]||data.default_id;
-    select.addEventListener('change',()=>{const tail=location.pathname.endsWith('viewer.html')?'viewer.html':'';location.assign('/workspaces/'+encodeURIComponent(select.value)+'/'+tail)});
+    select.addEventListener('change',()=>{const tail=location.pathname.endsWith('viewer.html')?'viewer.html':location.pathname.endsWith('game.html')?'game.html':'';location.assign('/workspaces/'+encodeURIComponent(select.value)+'/'+tail)});
     host.append(select);
   }catch{/* Existing single-workspace pages remain usable offline. */}
 }

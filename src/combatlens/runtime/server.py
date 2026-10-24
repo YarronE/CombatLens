@@ -17,6 +17,7 @@ from .presentation import resolve as resolve_presentation
 from .event_guide import resolve as resolve_event_guide
 from .collection import Collection
 from .design_study import resolve as resolve_design_study
+from .game_study import service as game_study_service
 
 
 class WorkbenchServer(ThreadingHTTPServer):
@@ -94,6 +95,13 @@ class Handler(BaseHTTPRequestHandler):
                 self.reply(200, {"service": "combatlens", "api_version": 1,
                                  "pid": os.getpid(), "port": self.server.server_port,
                                  "workspace_fingerprint": hashlib.sha256(workspace).hexdigest()})
+            elif path == "/api/game-study":
+                self.reply(200, game_study_service(repository).metadata())
+            elif path in {"/api/game-study/rows","/api/game-study/record","/api/game-study/projection","/api/game-study/profile"}:
+                from urllib.parse import parse_qs
+                query=parse_qs(urlsplit(self.path).query,keep_blank_values=True)
+                method={"rows":"rows","record":"record","projection":"projection","profile":"profile"}[path.rsplit("/",1)[1]]
+                self.reply(200,getattr(game_study_service(repository),method)(query))
             elif path == "/api/design-study":
                 self.reply(200, resolve_design_study(repository))
             elif path == "/api/event-guide":

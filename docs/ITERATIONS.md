@@ -170,3 +170,17 @@ preview controls. Action-scoped asynchronous loading prevents old responses from
 crossing contexts. Calculations and hypotheses keep their own evidence status.
 Two reviewed local imports exercised animated-second and native-frame/static
 paths. Browser acceptance confirmed both outcomes. Case material stays local.
+
+
+## 2026-10-24 — Whole-game analysis
+
+The user requested broader gameplay analysis beyond individual actions. The
+shared workspace now connects preparation, session systems and progression to
+registered native rows and explicit references, with a build comparison notebook.
+Local evidence exposed repeated native pool IDs and group-level tool annotations;
+both retain physical-row identity rather than selecting an arbitrary first row.
+Native table shape mismatches remain import gaps instead of relaxed decoding.
+Source summaries and analyst hypotheses are independently labeled. The existing
+visual language and action workflow remain available without a case-specific
+frontend fork. Routine decisions were delegated to the agent under the current
+collaboration rule; no human review is claimed for the engineering design.

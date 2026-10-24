@@ -1,6 +1,6 @@
 # Status
 
-Version 0.9.0, 2026-10-24.
+Version 0.10.0, 2026-10-24.
 
 Implemented request routing, reviewed local adapter registration, independent
 research runs, source checks, stage reports, research overview and the generic
@@ -125,3 +125,25 @@ cross-workspace switching, and a native-frame/static-mesh case. Source-dependent
 failure, late-response isolation and private freeze closure have automated tests.
 The local cases remain limited samples. No full-game recovery, runtime damage,
 phase trigger probability, or reconstructed runtime FPS is claimed.
+
+
+Whole-game iteration: the optional game workspace connects out-of-run preparation,
+in-run exploration, equipment/effect choices, character growth, encounters and
+rewards/modes. Physical-row searches and exact references retain duplicate IDs;
+candidate pools and ambiguous tool names cannot masquerade as applied effects.
+Source-backed distributions are counts, not runtime probabilities. Coordinate
+projections require a declared identical frame. Analyst interpretations retain
+supporting sources and a validation question; stale support suppresses them.
+
+The Build A/B notebook saves fingerprint-scoped drafts, checks declared mode and
+slot fields, records hypotheses and compares literal membership/conditions.
+Unknown stacking, unlock and character restrictions remain visible. Overview
+navigation promotes compatible whole-game runs and retains the action inspector.
+
+Validation: 113 Python checks ran, 109 passed and 4 skipped because Windows
+symlink privileges were unavailable; 98 Node checks passed. Actual local browser
+checks covered a source-to-candidate-to-effect chain, persisted A/B drafts and
+different party conditions, native map projection and legacy workspace switching.
+A 390px embedded-markup harness was visually checked; independent mobile devices
+were not tested. Private imports and table validation receipts remain local.
+No complete-game runtime simulation, optimal build or final damage claim is made.

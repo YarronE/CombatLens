@@ -200,3 +200,63 @@ coordinate alone cannot seek a model. A matching preview mapping and actual
 `sample_times_seconds` are required. Sample rate never proves runtime FPS.
 Unknown selections pause without moving the pose. Analysis mode displays the
 original study and disables its seek actions; copy editing remains separate.
+
+
+## Optional whole-game study
+
+Write `game-study.json` with schema `combatlens-game-study/1`, `game_build`,
+the exact `package_fingerprint`, `systems`, `tables`, and optional `lifecycle`,
+`analyses`, `build`, and `gaps`. All case-specific content remains private.
+Systems identify a label, phase, research question, description and gaps.
+Lifecycle entries resolve a registered `source_id` and JSON `pointer`;
+dated official descriptions must remain separate from fixed native snapshots.
+Analyst interpretations have a system, title, interpretation, validation
+question and supporting source IDs; changed support suppresses the explanation.
+
+A table descriptor has `id`, `label`, `system_id`, `source_id`, a JSON pointer
+to a row array, exact physical `count`, and `dependency_ids`. A standalone row
+object may set `single_row`. Rows retain `id` and `fields`; source row index is
+the authoritative physical ordinal. Preserve duplicate native IDs. Optional
+`label_source_id` reads tool annotations in `Entries[{ID, Entries}]` format.
+Group annotations never name individual rows with duplicated native IDs.
+`display_fields` and `field_labels` affect presentation only.
+
+Reference rules declare exact `fields`, target `table`, optional `sentinels`
+(default -1) and `mode` (`reference` or `pool`). All matching physical rows are
+returned. A pool is a candidate set, never an applied effect list. Unique,
+ambiguous, missing and stale targets remain distinct. No inferred suffix joins,
+weight normalization, arbitrary expressions or user-supplied file paths.
+
+`profile_fields` registers scalar distribution fields. Counts describe physical
+rows, including zero, false, null and absent fields. Clicking an original value
+filters the table. Integral JSON floats and integers compare numerically while
+booleans remain distinct. A table `projection` declares x/y and nonempty
+`frame_fields`; plots require a selected identical frame and retain native units.
+No world-map composition or navigation calculation is inferred.
+
+Read-only endpoints use the existing host/origin and workspace scope:
+
+- `/api/game-study` returns metadata and source-dependent status.
+- `/api/game-study/rows?table=&q=&native_id=&offset=&limit=` searches/paginates.
+  Registered `field=JSON_scalar` in q filters an exact original value.
+- `/api/game-study/record?table=&ordinal=` resolves a physical row and references.
+- `/api/game-study/profile?table=&field=` returns literal category counts.
+- `/api/game-study/projection?table=&frame=` returns same-frame native coordinates.
+
+Bounds: 2 MiB overlay, 120 tables, 200,000 rows per table, 200 rows per page,
+240-character query, 192 MiB per source JSON, and four cached documents bounded
+to 224 MiB of source bytes. Parsed object memory is additional. Large sources
+load only when queried. Register raw inputs, definitions and decoder dependencies.
+
+Build metadata supplies kind labels, modes and declarative validation settings:
+role limits; field-equality mode restrictions; item/container color capacities
+partitioned by declared fields; and direct-reference tables to trace. These are
+configuration checks, not full engine validation. Unselected containers and
+unknown unlock/character rules remain explicit gaps. Drafts use schema
+`combatlens-build/1`, source fingerprint, name, mode, party size, notes and at
+most 24 `{table, ordinal}` selections. Exported comparisons contain two drafts;
+foreign fingerprints and invalid identities are rejected. Imported records are
+revalidated instead of trusting serialized source values.
+
+Missing study files retain legacy behavior. Private freeze copies the overlay
+and registered source closure. A frozen bundle remains a fixed local installation.
