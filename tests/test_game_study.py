@@ -89,3 +89,27 @@ class GameStudyTests(unittest.TestCase):
   from unittest.mock import patch
   with patch.object(self.service,'labels',return_value={'10':'One of several names'}):
    rows=self.service.rows({'table':['items']})['rows'];self.assertTrue(all(r['label_kind']=='ambiguous_tool_annotation' for r in rows));self.assertTrue(all(r['name']!='One of several names' for r in rows));self.assertNotEqual(rows[0]['name'],rows[1]['name'])
+
+ def reading(self):
+  self.overlay['reading']={'schema':'combatlens-game-reading/1','title':'Designer reading','scope':'Fixed source','facts':[{'id':'zero','label':'Zero field','type':'record','table':'items','ordinal':0,'fields':['value','flag','unknown']},{'id':'count','label':'Physical count','type':'measure','table':'items','operation':'count','native_id':10},{'id':'text','label':'Description','type':'excerpt','source_id':'synthetic-source','pointer':'/description'}],'chapters':[{'id':'choice','title':'Choice','short_title':'Choice','fact_ids':['zero','count'],'interpretation':['A bounded hypothesis'],'player_choice':'Select with care','connection':'Next choice','tradeoffs':[{'option':'A','gain':'Possible','cost':'Unknown','condition':'Verify'}],'counterexamples':['An exception'],'gaps':['No runtime result'],'validation':'Test independently','system_ids':['preparation']},{'id':'other','title':'Other','short_title':'Other','fact_ids':['text'],'interpretation':['Independent description'],'gaps':[]}]};self.save();return self.overlay['reading']
+ def test_reading_recomputes_physical_rows_and_preserves_unknown(self):
+  self.reading();r=self.service.metadata()['reading'];self.assertEqual(r['status'],'ready');c=r['chapters'][0];self.assertEqual(c['status'],'hypothesis');self.assertEqual(c['evidence'][1]['value'],2);self.assertIs(c['evidence'][0]['value']['flag'],False);self.assertIsNone(c['evidence'][0]['value']['unknown']);self.assertIn('sha256',c['evidence'][0]['source']);self.assertNotIn('probability',c['evidence'][1])
+ def test_reading_missing_field_suppresses_only_dependent_chapter(self):
+  report=self.reading();report['facts'][0]['fields']=['absent'];self.save();r=self.service.metadata()['reading']['chapters'];self.assertEqual(r[0]['status'],'gap');self.assertNotIn('interpretation',r[0]);self.assertNotIn('tradeoffs',r[0]);self.assertEqual(r[1]['status'],'hypothesis')
+ def test_reading_changed_source_suppresses_cached_prose(self):
+  self.reading();self.service.metadata();self.path.write_text('{}');r=self.service.metadata()['reading']['chapters'];self.assertTrue(all(c['status']=='gap' for c in r));self.assertNotIn('A bounded hypothesis',json.dumps(r))
+ def test_reading_measure_does_not_mix_false_and_zero(self):
+  report=self.reading();f=report['facts'][1];f['where']={'flag':False};self.save();self.assertEqual(self.service.metadata()['reading']['chapters'][0]['evidence'][1]['value'],1);f['where']={'flag':0};self.save();self.assertEqual(self.service.metadata()['reading']['chapters'][0]['evidence'][1]['value'],0)
+ def test_reading_distinct_counts_and_rejects_complex_or_missing(self):
+  report=self.reading();f=report['facts'][1];f.update(operation='distinct',field='value');self.save();self.assertEqual(self.service.metadata()['reading']['chapters'][0]['evidence'][1]['value'],2);f['field']='absent';self.save();self.assertEqual(self.service.metadata()['reading']['chapters'][0]['status'],'gap')
+ def test_reading_never_promotes_forged_source_kind(self):
+  report=self.reading();report['facts'][2]['kind']='official_description';self.save();r=self.service.metadata()['reading']['chapters'][1]['evidence'][0];self.assertNotEqual(r['kind'],'official_description')
+ def test_reading_invalid_support_or_size_preserves_original_tables(self):
+  report=self.reading();report['chapters'][0]['fact_ids']=['unknown'];self.save();r=self.service.metadata();self.assertEqual(r['reading']['status'],'unavailable');self.assertEqual(len(r['tables']),4);report['chapters'][0]['fact_ids']=['zero'];report['facts']=report['facts']*40;self.save();self.assertEqual(self.service.metadata()['reading']['status'],'unavailable')
+ def test_reading_private_freeze_keeps_source_closure(self):
+  self.reading();from combatlens.bundle import freeze
+  for folder in ['src','web']:(self.root/folder).mkdir()
+  (self.root/'run.py').write_text('# synthetic');destination=self.root/'reading-copy';freeze(self.root,self.run,destination);self.path.write_text('{}');service=GameStudy(Repository(Config(destination,research_dir=destination/'local/research/frozen')));self.assertEqual(service.metadata()['reading']['chapters'][0]['status'],'hypothesis')
+
+ def test_reading_source_classification_comes_from_fingerprinted_package(self):
+  self.reading();package=json.loads((self.run/'research-package.json').read_text(encoding='utf-8'));package['sources'][0]['kind']='author_statement';save_json(self.run/'research-package.json',package);fp=digest((self.run/'research-package.json').read_bytes());timeline=json.loads((self.run/'timelines.json').read_text(encoding='utf-8'));timeline['package_fingerprint']=fp;save_json(self.run/'timelines.json',timeline);self.overlay['package_fingerprint']=fp;self.save();r=self.service.metadata()['reading']['chapters'][1]['evidence'][0];self.assertEqual(r['kind'],'author_statement')

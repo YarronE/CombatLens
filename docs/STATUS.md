@@ -1,6 +1,6 @@
 # Status
 
-Version 0.10.0, 2026-10-24.
+Version 0.11.0, 2026-10-24.
 
 Implemented request routing, reviewed local adapter registration, independent
 research runs, source checks, stage reports, research overview and the generic
@@ -147,3 +147,18 @@ different party conditions, native map projection and legacy workspace switching
 A 390px embedded-markup harness was visually checked; independent mobile devices
 were not tested. Private imports and table validation receipts remain local.
 No complete-game runtime simulation, optimal build or final damage claim is made.
+
+
+Gameplay reading iteration: compatible studies now open a designer-readable
+play-loop article, with a chapter directory, conditional choice tables,
+counterexamples, validation questions and explicit missing joins. Native rows,
+recomputed physical counts, official descriptions and author statements open
+alongside the interpretation. Source kinds use the fingerprinted package;
+changed sources or dependencies suppress dependent chapters independently.
+
+Validation: 122 Python checks ran, 118 passed and 4 skipped because Windows
+symlink privileges were unavailable; 98 Node checks passed. Local browser
+acceptance covered chapter navigation/restoration, computed scope inspection,
+exact native-record drilldown, notebook entry and legacy workspace access.
+The interpretation is an analyst hypothesis over fixed evidence. No complete
+runtime recovery, route optimum, stacking formula or build performance is claimed.

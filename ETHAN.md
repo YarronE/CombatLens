@@ -7,7 +7,7 @@
 - Personal style: `Y:/Ethans/00_System/Context/05_Personal-Style.md`.
 - Handoff rules: `Y:/Ethans/00_System/跨项目协作/instructions.md`.
 - Current design and private acceptance records: vault `20_Projects/AI-Tech/CombatLens/`.
-- Current completed change: `openspec/changes/add-whole-game-study/`; see `docs/STATUS.md`.
+- Current completed change: `openspec/changes/add-gameplay-reading/`; see `docs/STATUS.md`.
 
 ## 创建与同步约定
 
@@ -81,3 +81,13 @@ records and references, distributions, same-frame projections and Build A/B.
 It preserves the prior action workspace and all source boundaries. Raw tables
 whose row size disagrees with the locked definition remain explicit gaps.
 Source projects were read only. Case imports and receipts stay under local/.
+
+
+## 2026-10-24 gameplay reading handoff
+
+Continued the existing user-authorized whole-game analysis with a source-bound
+reading layer. The delegated decision agreement remains adopted. A written
+design preceded implementation. Source projects stayed read only; reused exports
+were not represented as new extraction. Public code contains generic contracts
+and synthetic validation only. Actual writing, source summaries and receipts
+remain private. Validation and unresolved relationships are in the vault project.

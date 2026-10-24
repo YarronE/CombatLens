@@ -260,3 +260,37 @@ revalidated instead of trusting serialized source values.
 
 Missing study files retain legacy behavior. Private freeze copies the overlay
 and registered source closure. A frozen bundle remains a fixed local installation.
+
+
+## Optional gameplay reading
+
+Within `game-study.json`, `reading` uses schema `combatlens-game-reading/1`, a
+title/scope, at most 96 facts and 16 chapters. No case content belongs in public
+Git. An absent reading preserves existing behavior; invalid reading registration
+does not disable original tables.
+
+Facts have unique IDs, labels, notes and optional dependency IDs. `type: excerpt`
+reads a registered source ID and JSON pointer, with a 4,000-character serialized
+limit. Its source kind comes from the fingerprinted research package, never an
+untrusted fact label or the reduced runtime registry. `type: record` specifies
+table, physical ordinal and 1-16 exact field names. `type: measure` specifies
+table and `count` or `distinct`, with an exact scalar `native_id` filter and up to
+four scalar field equalities in `where`. Distinct measures require `field`;
+missing/complex values fail rather than becoming invented categories. False,
+zero, null and strings remain distinct. Measures count physical rows or distinct
+raw field values; they carry scope and are never runtime probabilities.
+
+Chapters have unique IDs, title/short_title/question, system_ids, validation,
+gaps, and non-empty fact_ids. Supported content consists of player_choice,
+interpretation paragraphs, connection to the next choice, counterexamples and
+tradeoffs with option/gain/cost/condition. Each chapter independently suppresses
+that content if any required fact fails source, dependency or field checks.
+Titles, validation questions and gaps remain diagnostic. Narrative connections
+describe analyst reasoning, not proven native joins. Current facts expose source
+SHA, pointer/dependencies and optional exact record location for drilldown.
+
+The reading view is selected by `#view=reading&chapter=<id>` and becomes the
+default only for compatible packages. Chapter changes cancel pending detail
+requests. Raw configuration and Build notebook links retain existing identity
+rules. Refresh revalidates the reading; browser navigation restores the chapter.
+Private freeze retains the overlay and all registered reading sources.

@@ -121,7 +121,8 @@ samples. Analysis copies preserve the original study as a read-only reference.
 
 ## Whole-game analysis
 
-Open `game.html` for lifecycle and system navigation, native-table search,
+Open `game.html` for a source-bound designer reading when registered, plus
+lifecycle and system navigation, native-table search,
 physical-row reference tracing, field distributions, same-frame coordinate
 projections and a Build A/B notebook. A compatible run promotes this entry on
 its overview page. Existing action workspaces remain available.
@@ -131,3 +132,9 @@ export/import as JSON. Mode and slot checks inspect declared fields; candidate
 pools are never treated as simultaneously applied effects. Final damage,
 stacking rules, drop probabilities and route times require separate evidence.
 Adapters supply the optional [whole-game contract](docs/ADAPTERS.md#optional-whole-game-study).
+
+The optional gameplay reading follows player choices across systems. Chapters
+explain tradeoffs, conditional comparisons, exceptions and missing evidence.
+Original field evidence, official descriptions and author statements open in
+the same inspector. Counts are recomputed; stale evidence suppresses dependent
+interpretations. Existing packages retain their original navigation.

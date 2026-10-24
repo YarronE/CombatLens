@@ -184,3 +184,16 @@ Source summaries and analyst hypotheses are independently labeled. The existing
 visual language and action workflow remain available without a case-specific
 frontend fork. Routine decisions were delegated to the agent under the current
 collaboration rule; no human review is claimed for the engineering design.
+
+
+## Source-bound gameplay reading
+
+The user requested designer-readable relationships across preparation,
+exploration rewards, equipment effects and builds. Added an optional reading
+layer with player choices, conditional tradeoffs, exceptions and source gaps.
+Evidence can be inspected beside prose and opened at its original physical row.
+Counts are recomputed and dependent prose fails closed on invalid evidence.
+An actual package exposed source-kind loss in the reduced registry; the resolver
+now reads classification from the fingerprinted package, with regression coverage.
+Generic checks cover partial invalidation, typed counts, closure and hostile
+registration. Case interpretation and imported evidence remain local.

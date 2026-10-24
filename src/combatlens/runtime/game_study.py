@@ -4,6 +4,7 @@ from collections import OrderedDict,Counter
 from .repository import read_json
 from .validation import WorkbenchError,json_equivalent
 from .design_study import pointer
+from .game_reading import resolve as resolve_reading
 
 IDENTIFIER=re.compile(r'^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$')
 MAX_SOURCE=192*1024*1024
@@ -108,7 +109,7 @@ class GameStudy:
                 item.update(status='hypothesis',interpretation=str(a.get('interpretation',''))[:2000])
             except (WorkbenchError,ValueError,TypeError):item.update(status='gap',interpretation='支持材料已失效，暂不展示原解释。')
             analyses.append(item)
-        return {'analyses':analyses,'status':'ready','schema':d['schema'],'game_build':d['game_build'],'package_fingerprint':d['package_fingerprint'],'title':d.get('title','全游戏研究'),'systems':d['systems'],'tables':tables,'lifecycle':lifecycle,'build':d.get('build',{}),'gaps':d.get('gaps',[])[:40],'sources':[{'id':s['id'],'kind':s.get('kind'),'url':s.get('url'),'title':s.get('title',s['id'])} for s in self.repo.research()[0]['sources']]}
+        return {'reading':resolve_reading(self,d),'analyses':analyses,'status':'ready','schema':d['schema'],'game_build':d['game_build'],'package_fingerprint':d['package_fingerprint'],'title':d.get('title','全游戏研究'),'systems':d['systems'],'tables':tables,'lifecycle':lifecycle,'build':d.get('build',{}),'gaps':d.get('gaps',[])[:40],'sources':[{'id':s['id'],'kind':s.get('kind'),'url':s.get('url'),'title':s.get('title',s['id'])} for s in self.repo.research()[0]['sources']]}
     def rows(self,query):
         tid=query.get('table',[''])[0];q=query.get('q',[''])[0];offset=bounded_int(query.get('offset',['0'])[0],200000,'偏移');limit=bounded_int(query.get('limit',['40'])[0],200,'条数')
         if not limit or len(q)>240:fail('查询超出范围',400)
