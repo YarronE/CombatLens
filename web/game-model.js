@@ -24,3 +24,24 @@ export function buildReport(value,records,config={}){
  info.push('字段检查未覆盖全部解锁和角色适用规则。');info.push('检查配置字段与引用；未计算最终伤害、掉落概率或最优配装。');return {gaps:[...new Set(gaps)],info,ready:ready.length};
 }
 export class RequestGate{constructor(){this.id=0;}cancel(){this.id++;}async run(fetcher,apply,fail=()=>{}){const token=++this.id;try{const data=await fetcher();if(token===this.id)apply(data);}catch(e){if(token===this.id)fail(e);}}}
+
+// A measure identity is resolved against registered evidence by the server.
+export function readingTarget(fact,table){
+ return {view:'browse',system:table.system_id,table:table.id,q:'',native:null,
+  fact:fact.scope?fact.id:null,focus:fact.id,offset:0,ordinal:fact.ordinal??null};
+}
+export function studyNavigation(state,changes){
+ const changed=key=>Object.hasOwn(changes,key)&&changes[key]!==state[key];
+ const next={...state,...changes};
+ if(!Object.hasOwn(changes,'fact')&&(changed('table')||changed('system')||next.view!=='browse'))next.fact=null;
+ if(!Object.hasOwn(changes,'focus')&&changed('chapter'))next.focus=null;
+ if(!Object.hasOwn(changes,'ordinal')&&['view','system','table','q','native','fact','offset'].some(changed))next.ordinal=null;
+ return next;
+}
+export function studyHash(state){
+ const p=new URLSearchParams({view:state.view,system:state.system});
+ for(const key of ['chapter','table','q','native','offset','ordinal','fact','focus']){
+  const v=state[key];if(v!==null&&v!==undefined&&v!=='')p.set(key,v);
+ }
+ return '#'+p;
+}

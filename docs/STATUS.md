@@ -162,3 +162,21 @@ acceptance covered chapter navigation/restoration, computed scope inspection,
 exact native-record drilldown, notebook entry and legacy workspace access.
 The interpretation is an analyst hypothesis over fixed evidence. No complete
 runtime recovery, route optimum, stacking formula or build performance is claimed.
+
+
+Evidence drilldown iteration: measure links now query only their supporting
+physical rows. The server resolves the registered fact and keeps all typed
+conditions, including explicit null native IDs. Unknown, mismatched and stale
+facts fail visibly. Count and distinct-value units remain separate from paging.
+The URL preserves measure scope and reading selection across pagination, search,
+refresh and history; return/remove controls are visible. Context changes clear
+obsolete details, and selected rows use physical identity. Distribution and
+projection summaries explicitly describe whole-table context.
+
+Validation: 128 Python checks ran, 124 passed and 4 Windows symlink checks were
+skipped; 101 Node checks passed. All eight measures in the local pilot matched
+their resolved values and row scopes. Browser acceptance covered scoped paging,
+refresh, history, returning to selected evidence, intersected search, distinct
+units and selection feedback. Private timing receipts remain local. No game
+interpretation or source evidence was changed. The work is on
+codex/evidence-drilldown and has not been merged into main.

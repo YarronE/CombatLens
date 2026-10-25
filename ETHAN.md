@@ -91,3 +91,15 @@ design preceded implementation. Source projects stayed read only; reused exports
 were not represented as new extraction. Public code contains generic contracts
 and synthetic validation only. Actual writing, source summaries and receipts
 remain private. Validation and unresolved relationships are in the vault project.
+
+
+## 2026-10-25 evidence drilldown handoff
+
+Continued the authorized Lens iteration; companion development is now handled
+in the user's separate project conversation. No messages were sent there.
+The delegated decision agreement remains adopted. Written design preceded a
+focused correction to reading-to-record navigation. Original evidence and source
+projects were read only. Generic changes and synthetic tests are on
+codex/evidence-drilldown; local acceptance is in the vault gameplay reading record.
+The current completed engineering change is
+openspec/changes/fix-reading-evidence-drilldown/.

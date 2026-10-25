@@ -13,7 +13,7 @@ from combatlens.runtime.server import create_server
 class GameStudyTests(unittest.TestCase):
  def setUp(self):
   self.tmp=tempfile.TemporaryDirectory();self.root=Path(self.tmp.name);self.run=Path(demo(self.root)['research_dir']);self.path=self.run/'synthetic-source.json'
-  self.data={'items':[{'id':10,'fields':{'value':0,'flag':False,'unknown':None,'effect':7,'pool':9}},{'id':10,'fields':{'value':2,'effect':8}}],'effects':[{'id':7,'fields':{'value':3}},{'id':7,'fields':{'value':4}},{'id':8,'fields':{'value':5}}],'pools':[{'id':9,'fields':{'candidate':7}},{'id':9,'fields':{'candidate':8}}],'points':[{'id':0,'fields':{'group':1,'x':0,'z':2}},{'id':1,'fields':{'group':2,'x':100,'z':100}},{'id':2,'fields':{'group':1,'x':1,'z':3}}],'description':'Synthetic lifecycle'}
+  self.data={'items':[{'id':10,'fields':{'group':1,'value':0,'flag':False,'unknown':None,'effect':7,'pool':9}},{'id':10,'fields':{'group':1,'value':2,'effect':8}}],'effects':[{'id':7,'fields':{'value':3}},{'id':7,'fields':{'value':4}},{'id':8,'fields':{'value':5}}],'pools':[{'id':9,'fields':{'candidate':7}},{'id':9,'fields':{'candidate':8}}],'points':[{'id':0,'fields':{'group':1,'x':0,'z':2}},{'id':1,'fields':{'group':2,'x':100,'z':100}},{'id':2,'fields':{'group':1,'x':1,'z':3}}],'description':'Synthetic lifecycle'}
   self.path.write_text(json.dumps(self.data),encoding='utf-8');package=json.loads((self.run/'research-package.json').read_text(encoding='utf-8'));package['sources'][0]['sha256']=digest(self.path.read_bytes());save_json(self.run/'research-package.json',package);fp=digest((self.run/'research-package.json').read_bytes());t=json.loads((self.run/'timelines.json').read_text(encoding='utf-8'));t['package_fingerprint']=fp;save_json(self.run/'timelines.json',t)
   self.tables=[{'id':name,'label':name,'system_id':'preparation','source_id':'synthetic-source','pointer':'/'+name,'count':len(self.data[name]),'display_fields':['value','flag','unknown'],'references':[]} for name in ['items','effects','pools','points']]
   self.tables[0]['references']=[{'table':'effects','fields':['effect']},{'table':'pools','fields':['pool'],'mode':'pool'}];self.tables[3]['projection']={'x':'x','y':'z','frame_fields':['group'],'note':'Native units only'}
@@ -113,3 +113,55 @@ class GameStudyTests(unittest.TestCase):
 
  def test_reading_source_classification_comes_from_fingerprinted_package(self):
   self.reading();package=json.loads((self.run/'research-package.json').read_text(encoding='utf-8'));package['sources'][0]['kind']='author_statement';save_json(self.run/'research-package.json',package);fp=digest((self.run/'research-package.json').read_bytes());timeline=json.loads((self.run/'timelines.json').read_text(encoding='utf-8'));timeline['package_fingerprint']=fp;save_json(self.run/'timelines.json',timeline);self.overlay['package_fingerprint']=fp;self.save();r=self.service.metadata()['reading']['chapters'][1]['evidence'][0];self.assertEqual(r['kind'],'author_statement')
+
+ def test_measure_drilldown_preserves_all_predicates_with_paging_and_search(self):
+  report=self.reading();f=report['facts'][1];f['where']={'flag':False,'value':0};self.save()
+  query={'table':['items'],'fact':['count'],'limit':['1']};d=self.service.rows(query)
+  self.assertEqual(d['total'],1);self.assertEqual([r['ordinal'] for r in d['rows']],[0]);self.assertEqual(d['scope']['value'],1)
+  self.assertEqual(d['scope']['chapter'],'choice');self.assertEqual(d['scope']['where'],f['where'])
+  self.assertEqual(self.service.rows({**query,'offset':['1']})['rows'],[])
+  self.assertEqual(self.service.rows({**query,'q':['value 2']})['total'],0)
+  self.assertEqual(self.service.rows({'table':['items']})['total'],2)
+
+ def test_measure_drilldown_keeps_distinct_units_and_duplicate_rows(self):
+  report=self.reading();report['facts'][1].update(operation='distinct',field='group');self.save()
+  result=self.service.rows({'table':['items'],'fact':['count']})
+  self.assertEqual(result['scope']['operation'],'distinct');self.assertEqual(result['scope']['field'],'group');self.assertEqual(result['scope']['value'],1);self.assertEqual(result['total'],2);self.assertEqual([r['ordinal'] for r in result['rows']],[0,1])
+  report['facts'][1]['field']='unknown';report['facts'][1]['where']={'unknown':None};self.save()
+  result=self.service.rows({'table':['items'],'fact':['count']});self.assertEqual(result['scope']['value'],1);self.assertEqual(result['total'],1)
+
+ def test_measure_drilldown_distinguishes_scalar_types_and_missing_fields(self):
+  report=self.reading();fact=report['facts'][1]
+  for where,total in [({'flag':False},1),({'flag':0},0),({'value':0},1),({'value':False},0),({'value':'0'},0),({'unknown':None},1),({'absent':None},0)]:
+   fact['where']=where;self.save();result=self.service.rows({'table':['items'],'fact':['count']})
+   self.assertEqual(result['total'],total);self.assertEqual(result['scope']['value'],total)
+  fact['where']={};fact['native_id']='10';self.save();self.assertEqual(self.service.rows({'table':['items'],'fact':['count']})['total'],0)
+  fact['native_id']=None;self.save();result=self.service.rows({'table':['items'],'fact':['count']});self.assertEqual(result['total'],0);self.assertTrue(result['scope']['has_native_id'])
+  del fact['native_id'];self.save();result=self.service.rows({'table':['items'],'fact':['count']});self.assertEqual(result['total'],2);self.assertFalse(result['scope']['has_native_id'])
+
+ def test_measure_drilldown_never_falls_back_for_invalid_or_stale_facts(self):
+  report=self.reading()
+  for query in [{'table':['items'],'fact':['missing']},{'table':['items'],'fact':['']},{'table':['items'],'fact':['x'*81]},{'table':['items'],'fact':['count','text']},{'table':['effects'],'fact':['count']},{'table':['items'],'fact':['zero']}]:
+   with self.assertRaises(WorkbenchError):self.service.rows(query)
+  report['facts'][1]['dependency_ids']=['absent'];self.save()
+  with self.assertRaises(WorkbenchError):self.service.rows({'table':['items'],'fact':['count']})
+  self.assertEqual(self.service.rows({'table':['items']})['total'],2)
+  self.reading();self.path.write_text('{}')
+  with self.assertRaises(WorkbenchError):self.service.rows({'table':['items'],'fact':['count']})
+
+ def test_http_measure_scope_survives_encoded_query(self):
+  report=self.reading();report['facts'][1]['where']={'value':0};self.save()
+  server=create_server(Config(self.root,research_dir=self.run),port=0);thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
+  try:
+   base=f'http://127.0.0.1:{server.server_port}/api/game-study/rows?table=items&fact=count'
+   result=json.load(urlopen(base));self.assertEqual(result['total'],1);self.assertEqual(result['scope']['id'],'count')
+   with self.assertRaises(HTTPError) as error:urlopen(base.replace('fact=count','fact=missing'))
+   self.assertEqual(error.exception.code,409)
+  finally:server.shutdown();server.server_close();thread.join()
+
+ def test_measure_pagination_does_not_recompute_unrelated_tables(self):
+  from unittest.mock import patch
+  report=self.reading();report['facts'].append({'id':'other-count','type':'measure','label':'Other count','table':'effects','operation':'count'});report['chapters'][1]['fact_ids'].append('other-count');self.save()
+  with patch.object(self.service,'table',wraps=self.service.table) as lookup:
+   result=self.service.rows({'table':['items'],'fact':['count']});self.assertEqual(result['total'],2)
+   self.assertTrue(all(call.args[0]=='items' for call in lookup.call_args_list))

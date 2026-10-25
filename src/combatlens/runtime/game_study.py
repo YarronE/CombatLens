@@ -110,10 +110,22 @@ class GameStudy:
             except (WorkbenchError,ValueError,TypeError):item.update(status='gap',interpretation='支持材料已失效，暂不展示原解释。')
             analyses.append(item)
         return {'reading':resolve_reading(self,d),'analyses':analyses,'status':'ready','schema':d['schema'],'game_build':d['game_build'],'package_fingerprint':d['package_fingerprint'],'title':d.get('title','全游戏研究'),'systems':d['systems'],'tables':tables,'lifecycle':lifecycle,'build':d.get('build',{}),'gaps':d.get('gaps',[])[:40],'sources':[{'id':s['id'],'kind':s.get('kind'),'url':s.get('url'),'title':s.get('title',s['id'])} for s in self.repo.research()[0]['sources']]}
+    def measure_scope(self,query,tid):
+        if 'fact' not in query:return None
+        values=query['fact']
+        if len(values)!=1 or not isinstance(values[0],str) or not 1<=len(values[0])<=80:fail('统计依据标识无效',400)
+        report=resolve_reading(self,self.manifest(),requested_fact=values[0])
+        for chapter in report.get('chapters',[]):
+            for fact in chapter['evidence']:
+                if fact['id']!=values[0]:continue
+                if fact['status']!='ready' or 'scope' not in fact or fact.get('table')!=tid:fail('统计依据或对应资料表已失效，请返回解读重新核对',409)
+                return {**fact['scope'],'id':fact['id'],'label':fact['label'],'value':fact['value'],'chapter':chapter['id']}
+        fail('统计依据未登记，请返回解读重新选择',409)
+
     def rows(self,query):
         tid=query.get('table',[''])[0];q=query.get('q',[''])[0];offset=bounded_int(query.get('offset',['0'])[0],200000,'偏移');limit=bounded_int(query.get('limit',['40'])[0],200,'条数')
         if not limit or len(q)>240:fail('查询超出范围',400)
-        t,rows,registry=self.table(tid);labels=self.labels(t,registry);terms=q.casefold().split();native=query.get('native_id',[None])[0];frame=query.get('frame',[None])[0];matches=[]
+        t,rows,registry=self.table(tid);scope=self.measure_scope(query,tid);labels=self.labels(t,registry);terms=q.casefold().split();native=query.get('native_id',[None])[0];frame=query.get('frame',[None])[0];matches=[]
         frame_fields=(t.get('projection') or {}).get('frame_fields',[])
         condition=None
         if '=' in q:
@@ -124,6 +136,9 @@ class GameStudy:
             if isinstance(expected,(list,dict)):fail('筛选值必须是标量',400)
             condition=(field,expected);terms=[]
         for i,r in enumerate(rows):
+            if scope:
+                if any(k not in r['fields'] or not json_equivalent(r['fields'][k],v) for k,v in scope['where'].items()):continue
+                if scope['has_native_id'] and not json_equivalent(r['id'],scope['native_id']):continue
             if native is not None and str(r['id'])!=native:continue
             if condition:
                 key,value=condition
@@ -133,7 +148,7 @@ class GameStudy:
                 text=(str(r['id'])+' '+labels.get(str(r['id']),'')+' '+str(r.get('name',''))+' '+str(r['fields'])).casefold()
                 if not all(term in text for term in terms):continue
             matches.append(i)
-        return {'table':tid,'total':len(matches),'offset':offset,'limit':limit,'rows':[self.summary(t,rows[i],i,labels) for i in matches[offset:offset+limit]],'source_id':t['source_id'],'package_fingerprint':self.repo.research()[1]}
+        return {'table':tid,'scope':scope,'total':len(matches),'offset':offset,'limit':limit,'rows':[self.summary(t,rows[i],i,labels) for i in matches[offset:offset+limit]],'source_id':t['source_id'],'package_fingerprint':self.repo.research()[1]}
     def record(self,query):
         tid=query.get('table',[''])[0];ordinal=bounded_int(query.get('ordinal',[''])[0],200000,'物理行');d=self.manifest();t,rows,registry=self.table(tid,d)
         if ordinal>=len(rows):fail('物理行不存在',404)

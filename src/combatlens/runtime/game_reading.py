@@ -16,7 +16,7 @@ def scalar(value):
     if type(value) is float and not math.isfinite(value):raise ValueError('Finite scalar required')
     return value
 
-def resolve(service,manifest):
+def resolve(service,manifest,*,requested_fact=None):
     report=manifest.get('reading')
     if report is None:return {'status':'missing','chapters':[]}
     try:
@@ -31,6 +31,11 @@ def resolve(service,manifest):
             fid=text(fact.get('id'),80)
             if not fid or fid in resolved:raise ValueError('Duplicate reading fact')
             item={'id':fid,'label':text(fact.get('label'),200),'status':'gap','note':text(fact.get('note',''))}
+            # Scope queries verify their selected fact without recomputing unrelated tables.
+            # Chapter shape is still checked; partial prose is never returned by that endpoint.
+            if requested_fact is not None and fid!=requested_fact:
+                resolved[fid]=item
+                continue
             try:
                 for sid in fact.get('dependency_ids',[]):service.current(sid,registry)
                 if fact.get('type')=='excerpt':
@@ -56,7 +61,7 @@ def resolve(service,manifest):
                             field=text(fact['field'],100);values=[scalar(r['fields'][field]) for r in selected]
                             # Preserve false, zero, null and string identity; unify numeric 1/1.0.
                             value=len({('number' if type(v) in (int,float) else type(v).__name__,json.dumps(int(v) if type(v) is float and v.is_integer() else v,ensure_ascii=False,allow_nan=False)) for v in values})
-                        item.update(value=value,basis='physical_rows',scope={'operation':operation,'where':where,'native_id':fact.get('native_id'),'field':fact.get('field'),'total':len(rows)})
+                        item.update(value=value,basis='physical_rows',scope={'operation':operation,'where':where,'native_id':fact.get('native_id'),'has_native_id':'native_id' in fact,'field':fact.get('field'),'total':len(rows)})
                 else:raise ValueError('Unsupported fact type')
                 if len(json.dumps(item.get('value'),ensure_ascii=False,allow_nan=False))>12000:raise ValueError('Evidence too large')
                 item['status']='ready'

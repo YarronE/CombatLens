@@ -197,3 +197,16 @@ An actual package exposed source-kind loss in the reduced registry; the resolver
 now reads classification from the fingerprinted package, with regression coverage.
 Generic checks cover partial invalidation, typed counts, closure and hostile
 registration. Case interpretation and imported evidence remain local.
+
+
+## 2026-10-25 / Reading evidence drilldown
+
+The user continued workbench optimization while moving the companion project
+to another conversation. An actual measure link dropped its field predicates
+and opened the full table. Registered measure identity now drives a server-side
+scope, preserved through searching, paging and navigation. Invalid scopes never
+fall back to full-table results. Count units, distinct units and physical-row
+paging remain explicit. The shared renderer retains the existing visual design.
+Only the selected measure is recomputed during paging; unrelated tables are not
+queried. Synthetic regressions and local browser acceptance cover the behavior.
+Case values, timings and screenshots remain outside the public repository.
